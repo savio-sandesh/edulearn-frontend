@@ -1,0 +1,180 @@
+<!-- Loading state -->
+@if (loading()) {
+  <app-loader [visible]="true" [inline]="true" label="Loading course…" />
+}
+
+@else if (!course()) {
+  <div class="not-found">
+    <h2>Course not found</h2>
+    <a routerLink="/courses" class="btn-primary">← Browse Courses</a>
+  </div>
+}
+
+@else {
+  <!-- ── Course Hero ───────────────────────────── -->
+  <div class="detail-hero" [style.backgroundImage]="course()!.thumbnailUrl ? 'url(' + course()!.thumbnailUrl + ')' : 'none'">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <a routerLink="/courses" class="back-link">← All Courses</a>
+      <span class="category-badge">{{ course()!.category }}</span>
+      <h1>{{ course()!.title }}</h1>
+      <p class="course-desc">{{ course()!.description }}</p>
+
+      <div class="hero-meta">
+        <div class="rating-row">
+          <app-star-rating [rating]="course()!.averageRating ?? 0" [showCount]="false" />
+          <span class="rating-num">{{ (course()!.averageRating ?? 0).toFixed(1) }}</span>
+          <span class="review-count">({{ reviews().length }} reviews)</span>
+        </div>
+        <span class="meta-dot">·</span>
+        <span>{{ course()!.enrollmentCount | number }} students</span>
+        <span class="meta-dot">·</span>
+        <span>{{ course()!.level }}</span>
+        <span class="meta-dot">·</span>
+        <span>{{ course()!.language }}</span>
+      </div>
+
+      @if (course()!.instructorName) {
+        <p class="instructor-line">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z"/></svg>
+          Instructor: <strong>{{ course()!.instructorName }}</strong>
+        </p>
+      }
+    </div>
+  </div>
+
+  <!-- ── Body Layout ──────────────────────────── -->
+  <div class="detail-body">
+
+    <!-- Left: main content -->
+    <div class="detail-main">
+
+      <!-- Stats pills -->
+      <div class="stats-row">
+        <div class="stat-pill">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 0 0 0-1.5h-3.25V5Z" clip-rule="evenodd"/></svg>
+          {{ formatDuration(course()!.totalDuration) }}
+        </div>
+        <div class="stat-pill">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M10.75 16.82A7.462 7.462 0 0 1 10 17c-.34 0-.673-.028-1-.082v-2.636a5.986 5.986 0 0 0 2 0v2.636ZM5.148 14.706a7.5 7.5 0 0 1-1.98-2.204l2.24-1.294a5.986 5.986 0 0 0 1.042 1.393l-1.302 2.105ZM4.083 9.049a7.466 7.466 0 0 1 .085-2.092l2.567.736a5.987 5.987 0 0 0-.085 1.356v.001l-2.567-.001ZM5.045 4.971A7.5 7.5 0 0 1 7.01 3.27L8.272 5.39A5.986 5.986 0 0 0 6.36 6.696L5.045 4.97Z"/></svg>
+          {{ course()!.level }}
+        </div>
+        <div class="stat-pill">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z"/></svg>
+          {{ course()!.language }}
+        </div>
+        <div class="stat-pill">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM1.49 15.326a.78.78 0 0 1-.358-.442 3 3 0 0 1 4.308-3.516 6.484 6.484 0 0 0-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 0 1-2.07-.655ZM16.44 15.98a4.97 4.97 0 0 0 2.07-.654.78.78 0 0 0 .357-.442 3 3 0 0 0-4.308-3.517 6.484 6.484 0 0 1 1.907 3.96 2.32 2.32 0 0 1-.026.654ZM18 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM5.304 16.19a.844.844 0 0 1-.277-.71 5 5 0 0 1 9.947 0 .843.843 0 0 1-.277.71A6.975 6.975 0 0 1 10 18a6.974 6.974 0 0 1-4.696-1.81Z"/></svg>
+          {{ course()!.enrollmentCount | number }} enrolled
+        </div>
+      </div>
+
+      <!-- About -->
+      <section class="detail-section">
+        <h2>About This Course</h2>
+        <p class="about-text">{{ course()!.description }}</p>
+      </section>
+
+      <!-- Reviews -->
+      <section class="detail-section">
+        <h2>Student Reviews</h2>
+        @if (reviews().length === 0) {
+          <p class="no-reviews">No reviews yet. Be the first to leave one!</p>
+        } @else {
+          <div class="reviews-list">
+            @for (review of reviews(); track review.reviewId) {
+              <div class="review-card">
+                <div class="review-header">
+                  <div class="reviewer-avatar">
+                    @if (review.studentAvatarUrl) {
+                      <img [src]="review.studentAvatarUrl" [alt]="review.studentName" />
+                    } @else {
+                      <span>{{ (review.studentName ?? 'U')[0] }}</span>
+                    }
+                  </div>
+                  <div>
+                    <p class="reviewer-name">{{ review.studentName ?? 'Anonymous' }}</p>
+                    <p class="review-date">{{ review.createdAt | date:'mediumDate' }}</p>
+                  </div>
+                  <div class="review-stars">
+                    <app-star-rating [rating]="review.rating" [showCount]="false" />
+                  </div>
+                </div>
+                <p class="review-comment">{{ review.comment }}</p>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </div>
+
+    <!-- Right: Enrollment Card -->
+    <aside class="enroll-card">
+      <!-- Thumbnail preview -->
+      @if (course()!.thumbnailUrl) {
+        <img [src]="course()!.thumbnailUrl" [alt]="course()!.title" class="enroll-thumb" />
+      } @else {
+        <div class="enroll-thumb-placeholder">
+          <span>🎓</span>
+        </div>
+      }
+
+      <div class="enroll-body">
+        <!-- Price -->
+        <div class="price-row">
+          <span class="price">{{ course()!.price === 0 ? 'Free' : ('$' + course()!.price.toFixed(2)) }}</span>
+        </div>
+
+        <!-- CTA Button -->
+        @if (isEnrolled()) {
+          <a [routerLink]="['/courses', course()!.courseId, 'learn']" class="btn-enrolled">
+            ▶ Continue Learning
+          </a>
+        } @else {
+          <button class="btn-enroll" (click)="enroll()" [disabled]="enrolling() || checkingEnrollment()">
+            @if (enrolling()) {
+              <span class="spin"></span> Enrolling…
+            } @else {
+              {{ course()!.price === 0 ? 'Enroll for Free' : 'Enroll Now' }}
+            }
+          </button>
+        }
+
+        @if (!auth.isLoggedIn()) {
+          <p class="login-hint">
+            <a routerLink="/login">Sign in</a> to enroll in this course.
+          </p>
+        }
+
+        <!-- Includes -->
+        <ul class="includes-list">
+          <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"/></svg>
+            Full lifetime access
+          </li>
+          <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"/></svg>
+            {{ formatDuration(course()!.totalDuration) }} of content
+          </li>
+          <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"/></svg>
+            Certificate of completion
+          </li>
+          <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"/></svg>
+            Mobile &amp; desktop access
+          </li>
+        </ul>
+
+        <div class="enroll-meta">
+          <span class="enroll-meta-item">
+            <strong>Category:</strong> {{ course()!.category }}
+          </span>
+          <span class="enroll-meta-item">
+            <strong>Updated:</strong> {{ course()!.updatedAt | date:'MMM y' }}
+          </span>
+        </div>
+      </div>
+    </aside>
+  </div>
+}

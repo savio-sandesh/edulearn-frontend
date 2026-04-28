@@ -1,0 +1,140 @@
+<!-- NOTE: optionText is resolved via component method getOptionText() -->
+<!-- Loading -->
+@if (state() === 'loading') {
+  <div class="quiz-center">
+    <div class="quiz-spinner"></div>
+    <p>Loading quiz…</p>
+  </div>
+}
+
+<!-- Error -->
+@else if (state() === 'error') {
+  <div class="quiz-center">
+    <div class="quiz-error-icon">⚠️</div>
+    <h2>Quiz not found</h2>
+    <a [routerLink]="['/courses', courseId]" class="btn-back">← Back to course</a>
+  </div>
+}
+
+<!-- Results -->
+@else if (state() === 'submitted' && result()) {
+  <div class="quiz-results-page">
+    <div class="result-card">
+      <div class="result-icon" [class.passed]="result()!.isPassed" [class.failed]="!result()!.isPassed">
+        {{ result()!.isPassed ? '🏆' : '📝' }}
+      </div>
+      <h1>{{ result()!.isPassed ? 'Congratulations!' : 'Keep Practising' }}</h1>
+      <p class="result-sub">{{ result()!.isPassed ? 'You passed the quiz!' : "You didn't reach the passing score this time." }}</p>
+
+      <div class="score-ring">
+        <svg viewBox="0 0 36 36" class="circular-chart" [class.pass]="result()!.isPassed">
+          <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+          <path class="circle" [attr.stroke-dasharray]="result()!.score + ', 100'"
+            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+        </svg>
+        <div class="score-text">
+          <span class="score-num">{{ result()!.score }}</span>
+          <span class="score-label">/ 100</span>
+        </div>
+      </div>
+
+      <p class="passing-line">Passing score: {{ quiz()!.passingScore }}%</p>
+
+      <!-- Answer review -->
+      <div class="answer-review">
+        <h3>Answer Review</h3>
+        @for (q of questions(); track q.questionId; let i = $index) {
+          <div class="review-item" [class.correct]="wasAnsweredCorrectly(q)" [class.wrong]="!wasAnsweredCorrectly(q)">
+            <span class="q-badge">{{ wasAnsweredCorrectly(q) ? '✓' : '✗' }}</span>
+            <div>
+              <p class="q-text">{{ i + 1 }}. {{ q.text }}</p>
+              <p class="q-answer">Your answer: <strong>{{ getOptionText(q, answers()[q.questionId]) }}</strong></p>
+              @if (!wasAnsweredCorrectly(q) && q.correctAnswer) {
+                <p class="q-correct">Correct: <strong>{{ getOptionText(q, q.correctAnswer!) }}</strong></p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="result-actions">
+        @if (!result()!.isPassed && quiz()!.maxAttempts > 1) {
+          <button class="btn-retry" (click)="retry()">Try Again</button>
+        }
+        <a [routerLink]="['/courses', courseId, 'learn']" class="btn-continue">
+          Continue Learning →
+        </a>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Quiz Taking -->
+@else if (state() === 'taking' && quiz()) {
+  <div class="quiz-page">
+    <!-- Header -->
+    <div class="quiz-header">
+      <a [routerLink]="['/courses', courseId, 'learn']" class="quiz-back">← Exit Quiz</a>
+      <div class="quiz-meta">
+        <span class="quiz-title">{{ quiz()!.title }}</span>
+        <span class="quiz-count">Question {{ current() + 1 }} of {{ totalQ() }}</span>
+      </div>
+      <div class="quiz-prog-bar">
+        <div class="quiz-prog-fill" [style.width.%]="progressPct()"></div>
+      </div>
+    </div>
+
+    <div class="quiz-body">
+      <!-- Question dots (navigator) -->
+      <div class="q-dots">
+        @for (q of questions(); track q.questionId; let i = $index) {
+          <button
+            class="q-dot"
+            [class.active]="i === current()"
+            [class.answered]="answers()[q.questionId]"
+            (click)="goTo(i)"
+            [title]="'Question ' + (i + 1)"
+          ></button>
+        }
+      </div>
+
+      <!-- Question card -->
+      @if (currentQ()) {
+        <div class="question-card">
+          <p class="q-label">Question {{ current() + 1 }}</p>
+          <h2>{{ currentQ().text }}</h2>
+
+          <div class="options-list">
+            @for (opt of currentQ().options; track opt.optionId) {
+              <button
+                class="option-btn"
+                [class.selected]="isOptionSelected(opt.optionId)"
+                (click)="selectAnswer(currentQ().questionId, opt.optionId)"
+              >
+                <span class="opt-letter">{{ opt.optionId }}</span>
+                <span class="opt-text">{{ opt.text }}</span>
+                @if (isOptionSelected(opt.optionId)) {
+                  <span class="opt-check">✓</span>
+                }
+              </button>
+            }
+          </div>
+
+          <!-- Navigation -->
+          <div class="q-nav">
+            <button class="btn-nav" (click)="prev()" [disabled]="current() === 0">← Previous</button>
+            <span class="answered-count">{{ answeredCount() }}/{{ totalQ() }} answered</span>
+            @if (isLastQ()) {
+              <button class="btn-submit" (click)="submit()" [disabled]="submitting()">
+                @if (submitting()) { <span class="spin"></span> Submitting… }
+                @else { Submit Quiz }
+              </button>
+            } @else {
+              <button class="btn-nav btn-next" (click)="next()">Next →</button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

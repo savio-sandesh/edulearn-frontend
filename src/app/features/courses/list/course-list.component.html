@@ -1,0 +1,112 @@
+<div class="catalog-page">
+
+  <!-- ── Hero / Search Bar ─────────────────────────── -->
+  <section class="catalog-hero">
+    <div class="hero-inner">
+      <h1>Explore <span class="gradient-text">Courses</span></h1>
+      <p>Learn from industry experts across technology, design, and business.</p>
+
+      <form class="search-bar" (ngSubmit)="onSearch()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="search-icon">
+          <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd"/>
+        </svg>
+        <input
+          type="text"
+          [(ngModel)]="searchInput"
+          name="search"
+          placeholder="Search courses, topics, or instructors…"
+          autocomplete="off"
+        />
+        @if (searchInput) {
+          <button type="button" class="clear-btn" (click)="clearSearch()">✕</button>
+        }
+        <button type="submit" class="search-btn">Search</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ── Body ──────────────────────────────────────── -->
+  <div class="catalog-body">
+
+    <!-- Sidebar Filters -->
+    <aside class="filters">
+      <div class="filter-group">
+        <h3>Category</h3>
+        @for (cat of categories; track cat) {
+          <button
+            class="filter-btn"
+            [class.active]="selectedCategory() === cat"
+            (click)="setCategory(cat)"
+          >{{ cat }}</button>
+        }
+      </div>
+
+      <div class="filter-group">
+        <h3>Level</h3>
+        @for (lvl of levels; track lvl) {
+          <button
+            class="filter-btn"
+            [class.active]="selectedLevel() === lvl"
+            (click)="setLevel(lvl)"
+          >{{ lvl }}</button>
+        }
+      </div>
+
+      @if (hasActiveFilters()) {
+        <button class="clear-all-btn" (click)="clearFilters()">
+          ✕ Clear all filters
+        </button>
+      }
+    </aside>
+
+    <!-- Main Grid -->
+    <main class="catalog-main">
+
+      <!-- Results bar -->
+      <div class="results-bar">
+        @if (loading()) {
+          <span class="results-count">Loading courses…</span>
+        } @else {
+          <span class="results-count">
+            <strong>{{ totalCount() }}</strong> course{{ totalCount() !== 1 ? 's' : '' }} found
+          </span>
+        }
+      </div>
+
+      <!-- Loading state -->
+      @if (loading()) {
+        <div class="skeleton-grid">
+          @for (n of [1,2,3,4,5,6]; track n) {
+            <div class="skeleton-card">
+              <div class="sk-thumb"></div>
+              <div class="sk-body">
+                <div class="sk-line sk-short"></div>
+                <div class="sk-line"></div>
+                <div class="sk-line sk-med"></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Empty state -->
+      @else if (filteredCourses().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <h2>No courses found</h2>
+          <p>Try adjusting your search or filters.</p>
+          <button class="btn-primary" (click)="clearFilters()">Clear Filters</button>
+        </div>
+      }
+
+      <!-- Course Grid -->
+      @else {
+        <div class="course-grid">
+          @for (course of filteredCourses(); track course.courseId) {
+            <app-course-card [course]="course" />
+          }
+        </div>
+      }
+    </main>
+  </div>
+</div>

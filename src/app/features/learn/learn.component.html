@@ -1,0 +1,140 @@
+<!-- Loading -->
+@if (loading()) {
+  <div class="learn-loading">
+    <div class="learn-spinner"></div>
+    <p>Loading your course…</p>
+  </div>
+}
+
+@else {
+<div class="learn-layout" [class.sidebar-closed]="!sidebarOpen()">
+
+  <!-- ── Lesson Sidebar ──────────────────────── -->
+  <aside class="learn-sidebar">
+    <!-- Sidebar header -->
+    <div class="sidebar-header">
+      <button class="close-sidebar" (click)="sidebarOpen.set(false)" title="Close sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 0 1 0-1.414L10.586 10 7.293 6.707a1 1 0 0 1 1.414-1.414l4 4a1 1 0 0 1 0 1.414l-4 4a1 1 0 0 1-1.414 0Z" clip-rule="evenodd"/></svg>
+      </button>
+      <div class="sidebar-title">
+        <h3>{{ course()?.title ?? 'Course Content' }}</h3>
+        <p>{{ progressPercent() }}% complete</p>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="sidebar-progress">
+      <div class="progress-fill" [style.width.%]="progressPercent()"></div>
+    </div>
+
+    <!-- Lesson list -->
+    <div class="lesson-list">
+      @for (lesson of lessons(); track lesson.lessonId; let i = $index) {
+        <button
+          class="lesson-item"
+          [class.active]="current()?.lessonId === lesson.lessonId"
+          [class.completed]="isCompleted(lesson.lessonId)"
+          (click)="selectLesson(lesson)"
+        >
+          <span class="lesson-num">
+            @if (isCompleted(lesson.lessonId)) {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd"/></svg>
+            } @else {
+              {{ i + 1 }}
+            }
+          </span>
+          <span class="lesson-info">
+            <span class="lesson-title">{{ lesson.title }}</span>
+            <span class="lesson-duration">{{ formatDuration(lesson.duration) }}</span>
+          </span>
+          @if (lesson.videoUrl) {
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="14" height="14" class="video-icon">
+              <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z"/>
+            </svg>
+          }
+        </button>
+      }
+
+      @if (lessons().length === 0) {
+        <div class="no-lessons">
+          <p>No lessons available yet.</p>
+        </div>
+      }
+    </div>
+
+    <!-- Back to course link -->
+    <a [routerLink]="['/courses', courseId()]" class="back-to-course">
+      ← Back to course
+    </a>
+  </aside>
+
+  <!-- ── Main Player Area ────────────────────── -->
+  <main class="learn-main">
+
+    <!-- Top bar -->
+    <div class="learn-topbar">
+      @if (!sidebarOpen()) {
+        <button class="open-sidebar" (click)="sidebarOpen.set(true)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Zm0 5.25a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd"/></svg>
+          Contents
+        </button>
+      }
+      <span class="topbar-title">{{ current()?.title ?? 'Select a lesson' }}</span>
+      <span class="topbar-progress">{{ progressPercent() }}% complete</span>
+    </div>
+
+    <!-- Video Player -->
+    <div class="video-container">
+      @if (safeVideoUrl()) {
+        <iframe
+          [src]="safeVideoUrl()!"
+          allowfullscreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          title="Lesson video"
+        ></iframe>
+      } @else if (current()) {
+        <div class="video-placeholder">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="56" height="56">
+            <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd"/>
+          </svg>
+          <p>No video for this lesson</p>
+        </div>
+      } @else {
+        <div class="video-placeholder">
+          <p>Select a lesson to start learning</p>
+        </div>
+      }
+    </div>
+
+    <!-- Lesson Content -->
+    @if (current()) {
+      <div class="lesson-content">
+        <h1>{{ current()!.title }}</h1>
+        @if (current()!.content) {
+          <div class="lesson-text">{{ current()!.content }}</div>
+        }
+
+        <!-- Navigation + Complete -->
+        <div class="lesson-actions">
+          <button class="btn-nav" (click)="goPrev()" [disabled]="currentIndex() === 0">
+            ← Previous
+          </button>
+
+          @if (isCompleted(current()!.lessonId)) {
+            <span class="completed-badge">✓ Completed</span>
+          } @else {
+            <button class="btn-complete" (click)="markComplete()" [disabled]="marking()">
+              @if (marking()) { <span class="spin"></span> Saving… }
+              @else { Mark as Complete ✓ }
+            </button>
+          }
+
+          <button class="btn-nav" (click)="goNext()" [disabled]="currentIndex() === lessons().length - 1">
+            Next →
+          </button>
+        </div>
+      </div>
+    }
+  </main>
+</div>
+}
