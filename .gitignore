@@ -1,0 +1,126 @@
+# ─────────────────────────────────────────────
+# EduLearn Frontend — .gitignore
+# ─────────────────────────────────────────────
+
+# ── Compiled Output ───────────────────────────
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# ── Angular Cache ─────────────────────────────
+/.angular/cache
+/.angular
+
+# ── Node ──────────────────────────────────────
+/node_modules
+npm-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.pnpm-debug.log*
+package-lock.json.bak
+
+# ── Environment files (keep templates, not secrets) ──
+# environment.ts is committed (it holds only localhost ports — no secrets)
+# If you ever put real API keys here, add:
+# src/environments/environment.production.ts
+
+# ── Test & Coverage ───────────────────────────
+/coverage
+testem.log
+.nyc_output
+
+# ── Build & Misc ──────────────────────────────
+/connect.lock
+/libpeerconnection.log
+/typings
+__screenshots__/
+.sass-cache/
+
+# ── Tailwind backup configs ───────────────────
+tailwind.config.js.bak
+postcss.config.js.bak
+
+# ── IDEs & Editors ────────────────────────────
+
+# JetBrains (WebStorm, IntelliJ, Rider)
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+# Eclipse
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Visual Studio Code — commit shared settings, ignore personal ones
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+.history/*
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+\#*\#
+.\#*
+
+# ── OS Generated ──────────────────────────────
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+
+# ── Logs ──────────────────────────────────────
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ── Runtime & Diagnostics ─────────────────────
+.node_repl_history
+.env
+.env.*
+!.env.example
+.cache
+
+# ── Certificates & Secrets ────────────────────
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+secrets/

@@ -1,0 +1,108 @@
+<div class="auth-page">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="auth-card">
+    <!-- Logo -->
+    <a routerLink="/" class="auth-logo">
+      <div class="logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.95 49.95 0 0 0-9.902 3.912l-.003.002-.34.18a.75.75 0 0 1-.707 0A50.01 50.01 0 0 0 7.5 12.174v-.224c0-.131.067-.248.172-.311a54.614 54.614 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.13 56.13 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.8 49.8 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z"/>
+          <path d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.285a.75.75 0 0 1-.46.71 47.878 47.878 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.877 47.877 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286A48.4 48.4 0 0 1 6 13.18v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.661a6.73 6.73 0 0 0 .551-1.608 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.668 2.25 2.25 0 0 0 2.12 0Z"/>
+        </svg>
+      </div>
+      <span class="logo-text">Edu<span>Learn</span></span>
+    </a>
+
+    <h1>Create your account</h1>
+    <p class="subtitle">Join thousands of learners and start growing today</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+      <!-- Full Name -->
+      <div class="field" [class.has-error]="fullName.invalid && fullName.touched">
+        <label for="reg-name">Full name</label>
+        <input id="reg-name" type="text" formControlName="fullName" placeholder="Jane Doe" autocomplete="name" />
+        @if (fullName.invalid && fullName.touched) {
+          <p class="field-err">{{ fullName.errors?.['required'] ? 'Name is required.' : 'Minimum 2 characters.' }}</p>
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="field" [class.has-error]="email.invalid && email.touched">
+        <label for="reg-email">Email address</label>
+        <input id="reg-email" type="email" formControlName="email" placeholder="you@example.com" autocomplete="email" />
+        @if (email.invalid && email.touched) {
+          <p class="field-err">{{ email.errors?.['required'] ? 'Email is required.' : 'Enter a valid email.' }}</p>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="field" [class.has-error]="password.invalid && password.touched">
+        <label for="reg-password">Password</label>
+        <div class="input-wrap">
+          <input
+            id="reg-password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Min 8 chars, 1 uppercase, 1 number"
+            autocomplete="new-password"
+          />
+          <button type="button" class="pw-toggle" (click)="showPassword.update(v => !v)" tabindex="-1">
+            @if (showPassword()) {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l14.5 14.5a.75.75 0 1 0 1.06-1.06l-1.745-1.745a10.029 10.029 0 0 0 3.3-4.38 1.651 1.651 0 0 0 0-1.185A10.004 10.004 0 0 0 9.999 3a9.956 9.956 0 0 0-4.744 1.194L3.28 2.22ZM7.752 6.69l1.092 1.092a2.5 2.5 0 0 1 3.374 3.373l1.091 1.092a4 4 0 0 0-5.557-5.557Z" clip-rule="evenodd"/><path d="M10.748 13.93l2.523 2.523a9.987 9.987 0 0 1-3.27.547c-4.258 0-7.894-2.66-9.337-6.41a1.651 1.651 0 0 1 0-1.186A10.007 10.007 0 0 1 2.839 6.02L6.07 9.252a4 4 0 0 0 4.678 4.678Z"/></svg>
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/><path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clip-rule="evenodd"/></svg>
+            }
+          </button>
+        </div>
+        @if (password.invalid && password.touched) {
+          <p class="field-err">
+            @if (password.errors?.['required']) { Password is required. }
+            @else if (password.errors?.['minlength']) { Minimum 8 characters. }
+            @else { Must contain 1 uppercase letter and 1 number. }
+          </p>
+        }
+        <!-- Password strength bar -->
+        @if (password.value) {
+          <div class="strength-bar">
+            <div class="bar" [class.weak]="password.invalid" [class.strong]="password.valid"></div>
+          </div>
+        }
+      </div>
+
+      <!-- Role Picker -->
+      <div class="field">
+        <label>I want to join as</label>
+        <div class="role-picker">
+          <label class="role-option" [class.selected]="role.value === 'STUDENT'">
+            <input type="radio" formControlName="role" value="STUDENT" />
+            <div class="role-icon">🎓</div>
+            <div>
+              <strong>Student</strong>
+              <span>Learn from experts</span>
+            </div>
+          </label>
+          <label class="role-option" [class.selected]="role.value === 'INSTRUCTOR'">
+            <input type="radio" formControlName="role" value="INSTRUCTOR" />
+            <div class="role-icon">🏫</div>
+            <div>
+              <strong>Instructor</strong>
+              <span>Share your knowledge</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" [disabled]="loading()">
+        @if (loading()) {
+          <span class="spin"></span> Creating account…
+        } @else {
+          Create Account →
+        }
+      </button>
+    </form>
+
+    <p class="switch-link">Already have an account? <a routerLink="/login">Sign in →</a></p>
+  </div>
+</div>
