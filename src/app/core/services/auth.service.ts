@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, throwError } from 'rxjs';
+import { Observable, tap, catchError, throwError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   User,
@@ -110,6 +110,32 @@ export class AuthService {
     return this.http
       .delete<{ message: string }>(`${this.base}/deactivate`)
       .pipe(tap(() => this.clearSession()));
+  }
+
+  // ─── Admin Endpoints ─────────────────────────────────────
+
+  /** Admin: Get active users by role. */
+  getUsersByRole(role: string): Observable<User[]> {
+    return this.http.get<User[]>(`${this.base}/by-role/${role}`).pipe(
+      catchError(() => of([])) // Return empty array on 404
+    );
+  }
+
+  /** Admin: Search users by name or email. */
+  searchUsers(query: string): Observable<User[]> {
+    return this.http.get<User[]>(`${this.base}/search?q=${query}`).pipe(
+      catchError(() => of([]))
+    );
+  }
+
+  /** Admin: Toggle user status (block/unblock). */
+  toggleUserStatus(userId: number): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.base}/${userId}/toggle-status`, {});
+  }
+
+  /** Admin: Soft delete user. */
+  deleteUser(userId: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.base}/${userId}`);
   }
 
   // ─── Token Helpers ────────────────────────────────────────

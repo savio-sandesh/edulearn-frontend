@@ -38,7 +38,7 @@ export class CourseListComponent implements OnInit {
     return this.courses().filter(c => {
       const matchSearch   = !q || c.title.toLowerCase().includes(q) || c.category.toLowerCase().includes(q);
       const matchCategory = cat === 'All' || c.category === cat;
-      const matchLevel    = lvl === 'All' || c.level === lvl;
+      const matchLevel    = lvl === 'All' || c.level.toUpperCase() === lvl.toUpperCase();
       return matchSearch && matchCategory && matchLevel;
     });
   });

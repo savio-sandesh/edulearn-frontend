@@ -7,7 +7,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { Course, CourseCreateRequest, Lesson, LessonCreateRequest } from '../../core/models';
 import { DecimalPipe, SlicePipe } from '@angular/common';
 
-type Tab = 'dashboard' | 'courses' | 'create' | 'analytics' | 'revenue' | 'lessons';
+type Tab = 'dashboard' | 'courses' | 'create' | 'edit' | 'analytics' | 'revenue' | 'lessons';
 
 @Component({
   selector: 'app-instructor',
@@ -46,6 +46,20 @@ export class InstructorComponent implements OnInit {
   thumbnailFile: File | null = null;
 
   readonly courseForm = this.fb.group({
+    title: ['', [Validators.required, Validators.minLength(5)]],
+    description: ['', [Validators.required, Validators.minLength(20)]],
+    category: ['', Validators.required],
+    level: ['BEGINNER', Validators.required],
+    language: ['English', Validators.required],
+    price: [0, [Validators.required, Validators.min(0)]],
+  });
+
+  // Edit Course State
+  readonly editingCourse = signal<Course | null>(null);
+  readonly submittingEdit = signal(false);
+  editThumbnailFile: File | null = null;
+
+  readonly editCourseForm = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(5)]],
     description: ['', [Validators.required, Validators.minLength(20)]],
     category: ['', Validators.required],
@@ -128,6 +142,13 @@ export class InstructorComponent implements OnInit {
     const file = event.target.files?.[0];
     if (file) {
       this.thumbnailFile = file;
+    }
+  }
+
+  onEditThumbnailSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (file) {
+      this.editThumbnailFile = file;
     }
   }
 
@@ -237,6 +258,66 @@ export class InstructorComponent implements OnInit {
   private finalizeCourseCreation(): void {
     this.submitting.set(false);
     this.thumbnailFile = null;
+    this.loadCourses();
+    this.activeTab.set('courses');
+  }
+
+  editCourse(course: Course): void {
+    this.editingCourse.set(course);
+    this.editCourseForm.patchValue({
+      title: course.title,
+      description: course.description,
+      category: course.category,
+      level: course.level,
+      language: course.language,
+      price: course.price
+    });
+    this.editThumbnailFile = null;
+    this.activeTab.set('edit');
+  }
+
+  submitEditCourse(): void {
+    if (this.editCourseForm.invalid) {
+      this.editCourseForm.markAllAsTouched();
+      this.toast.error('Please complete all required fields.');
+      return;
+    }
+
+    const course = this.editingCourse();
+    if (!course) return;
+
+    this.submittingEdit.set(true);
+    const payload = this.editCourseForm.value as any;
+
+    this.courseSvc.update(course.courseId, payload).subscribe({
+      next: () => {
+        if (this.editThumbnailFile) {
+          this.courseSvc.uploadThumbnail(course.courseId, this.editThumbnailFile).subscribe({
+            next: () => {
+              this.toast.success('Course updated successfully with new thumbnail!');
+              this.finalizeCourseEdit();
+            },
+            error: () => {
+              this.toast.error('Course updated, but thumbnail upload failed.');
+              this.finalizeCourseEdit();
+            }
+          });
+        } else {
+          this.toast.success('Course updated successfully!');
+          this.finalizeCourseEdit();
+        }
+      },
+      error: (err: any) => {
+        this.submittingEdit.set(false);
+        this.toast.error(err.error?.message || 'Failed to update course.');
+      }
+    });
+  }
+
+  private finalizeCourseEdit(): void {
+    this.submittingEdit.set(false);
+    this.editThumbnailFile = null;
+    this.editingCourse.set(null);
     this.loadCourses();
     this.activeTab.set('courses');
   }
