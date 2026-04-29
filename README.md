@@ -19,6 +19,7 @@
 
 - [Overview](#-overview)
 - [Tech Stack](#-tech-stack)
+- [User Roles & Features](#-user-roles--features)
 - [Architecture](#-architecture)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
@@ -51,6 +52,28 @@ The UI is built around a **premium dark design system** with glassmorphism cards
 | **Styling** | Custom CSS Design System (CSS Variables, SCSS) |
 | **Build Tool** | Angular CLI + esbuild |
 | **Runtime** | Node.js v22 |
+
+---
+
+## 👥 User Roles & Features
+
+### 🎓 Student
+- **Course Discovery**: Browse, search, and filter premium courses.
+- **Learning Hub**: Secure enrollment with progress tracking.
+- **Interactive Learning**: Custom video player with side-by-side lesson navigation.
+- **Assessments**: Take quizzes with immediate, automatic grading.
+- **Achievements**: Earn downloadable certificates upon course completion.
+
+### 👨‍🏫 Instructor
+- **Course Management**: Dedicated dashboard to manage authored content.
+- **Course Creation**: Define courses with categories, levels, and pricing structures.
+- **Media Uploads**: Seamless course thumbnail uploads (via Azure Blob Storage).
+- **Publishing Workflow**: Submit finalized courses to administrators for platform approval.
+
+### 🛡️ Admin
+- **Analytics Dashboard**: Platform-wide statistics with dynamic, Signals-driven visual CSS charts.
+- **User Management**: Comprehensive oversight including Soft Delete and Block/Unblock capabilities.
+- **Moderation**: Course approval workflow to review, approve, or reject pending instructor submissions.
 
 ---
 
@@ -240,7 +263,7 @@ For production, update `environment.production.ts` with your deployed API base U
 
 | Service | Port | Responsibility |
 |---|---|---|
-| **Auth API** | `:5206` | Register, Login, Profile, JWT refresh |
+| **Auth API** | `:5206` | Register, Login, Profile, JWT refresh, User Management (Admin) |
 | **Course API** | `:5224` | Course CRUD, search, reviews |
 | **Enrollment API** | `:5208` | Enroll, completion tracking |
 | **Content API** | `:5234` | Lessons, video content, file uploads |
