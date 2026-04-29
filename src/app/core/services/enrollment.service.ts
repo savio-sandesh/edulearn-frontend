@@ -1,27 +1,33 @@
-﻿import { Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Enrollment, EnrollmentCheckResult, LessonProgress, Certificate } from '../models';
+import { AuthService } from './auth.service';
+import { of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class EnrollmentService {
   private readonly http = inject(HttpClient);
+  private readonly authSvc = inject(AuthService);
   private readonly base = `${environment.apis.enrollment}/api/enrollments`;
+  private readonly progressBase = `${environment.apis.progress}/api/progress`;
 
   /** Enroll the authenticated user in a course. */
   enroll(courseId: number): Observable<Enrollment> {
-    return this.http.post<Enrollment>(this.base, { courseId });
+    return this.http.post<Enrollment>(`${this.base}/enroll/${courseId}`, {});
   }
 
   /** Check whether the current user is enrolled in a course. */
   checkEnrollment(courseId: number): Observable<EnrollmentCheckResult> {
-    return this.http.get<EnrollmentCheckResult>(`${this.base}/check/${courseId}`);
+    return this.http.get<EnrollmentCheckResult>(`${this.base}/isEnrolled/${courseId}`);
   }
 
   /** Get all enrollments for the authenticated user. */
   getMyEnrollments(): Observable<Enrollment[]> {
-    return this.http.get<Enrollment[]>(`${this.base}/my`);
+    const userId = this.authSvc.currentUser()?.userId;
+    if (!userId) return of([]);
+    return this.http.get<Enrollment[]>(`${this.base}/byStudent/${userId}`);
   }
 
   /** Get enrollments for a specific student (admin/instructor). */
@@ -36,12 +42,21 @@ export class EnrollmentService {
 
   /** Mark a lesson as complete for the current user. */
   completeLesson(lessonId: number, courseId: number): Observable<LessonProgress> {
-    return this.http.post<LessonProgress>(`${this.base}/progress`, { lessonId, courseId });
+    const studentId = this.authSvc.currentUser()?.userId;
+    if (!studentId) return of({} as LessonProgress);
+    return this.http.post<LessonProgress>(`${this.progressBase}/mark-complete`, { 
+      studentId, 
+      courseId, 
+      lessonId, 
+      isCompleted: true 
+    });
   }
 
   /** Get lesson progress for a course. */
   getLessonProgress(courseId: number): Observable<LessonProgress[]> {
-    return this.http.get<LessonProgress[]>(`${this.base}/progress/${courseId}`);
+    const studentId = this.authSvc.currentUser()?.userId;
+    if (!studentId) return of([]);
+    return this.http.get<LessonProgress[]>(`${this.progressBase}/lesson-progress?courseId=${courseId}&studentId=${studentId}`);
   }
 
   /** Mark a course as complete and trigger certificate generation. */

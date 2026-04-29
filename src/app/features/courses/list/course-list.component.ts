@@ -19,7 +19,7 @@ export class CourseListComponent implements OnInit {
   private readonly courseService = inject(CourseService);
   private readonly toast         = inject(ToastService);
 
-  readonly categories = CATEGORIES;
+  readonly categories = signal<string[]>(['All']);
   readonly levels     = LEVELS;
 
   // ── State ─────────────────────────────────────────────────
@@ -47,6 +47,14 @@ export class CourseListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCourses();
+    this.loadCategories();
+  }
+
+  loadCategories(): void {
+    this.courseService.getCategories().subscribe({
+      next: (cats) => this.categories.set(['All', ...cats]),
+      error: () => console.warn('Could not load categories.')
+    });
   }
 
   loadCourses(): void {

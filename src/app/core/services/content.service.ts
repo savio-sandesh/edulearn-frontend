@@ -1,4 +1,4 @@
-﻿import { Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -11,12 +11,12 @@ export class ContentService {
 
   /** Get all published lessons for a course, sorted by order. */
   getLessons(courseId: number): Observable<Lesson[]> {
-    return this.http.get<Lesson[]>(`${this.base}/course/${courseId}`);
+    return this.http.get<Lesson[]>(`${this.base}/ordered/${courseId}`);
   }
 
   /** Get a single lesson by ID. */
   getLesson(lessonId: number): Observable<Lesson> {
-    return this.http.get<Lesson>(`${this.base}/${lessonId}`);
+    return this.http.get<Lesson>(`${this.base}/byId/${lessonId}`);
   }
 
   /** Create a new lesson (instructor only). */
@@ -26,16 +26,23 @@ export class ContentService {
 
   /** Update an existing lesson. */
   updateLesson(lessonId: number, dto: LessonUpdateRequest): Observable<Lesson> {
-    return this.http.put<Lesson>(`${this.base}/${lessonId}`, dto);
+    return this.http.put<Lesson>(`${this.base}/update/${lessonId}`, dto);
   }
 
   /** Delete a lesson. */
   deleteLesson(lessonId: number): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.base}/${lessonId}`);
+    return this.http.delete<{ message: string }>(`${this.base}/lesson/${lessonId}`);
+  }
+
+  /** Upload a video file for a lesson. */
+  uploadVideo(file: File): Observable<{ url: string }> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{ url: string }>(`${this.base}/upload-video`, form);
   }
 
   /** Reorder lessons within a course. */
   reorderLessons(courseId: number, dto: ReorderLessonsRequest): Observable<{ message: string }> {
-    return this.http.put<{ message: string }>(`${this.base}/course/${courseId}/reorder`, dto);
+    return this.http.put<{ message: string }>(`${this.base}/reorder/${courseId}`, dto);
   }
 }

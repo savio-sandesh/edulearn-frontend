@@ -2,31 +2,32 @@ export interface Lesson {
   lessonId: number;
   courseId: number;
   title: string;
-  content: string;
-  videoUrl?: string;
+  description: string;
+  contentType: string;
+  contentUrl: string;
   order: number;
   isPublished: boolean;
   isPreview: boolean;
-  duration: number; // in minutes
+  durationMinutes: number;
 }
 
 export interface LessonCreateRequest {
   courseId: number;
   title: string;
-  content: string;
-  videoUrl?: string;
-  order: number;
+  description: string;
+  contentType: string;
+  contentUrl: string;
+  durationMinutes: number;
   isPreview: boolean;
-  duration: number;
 }
 
 export interface LessonUpdateRequest {
   title: string;
-  content: string;
-  videoUrl?: string;
-  order: number;
+  description: string;
+  contentType: string;
+  contentUrl: string;
+  durationMinutes: number;
   isPreview: boolean;
-  duration: number;
 }
 
 export interface ReorderLessonsRequest {

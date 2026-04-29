@@ -1,0 +1,345 @@
+<div class="instructor-layout">
+  
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <button class="nav-item" [class.active]="activeTab() === 'dashboard'" (click)="setTab('dashboard')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" width="18" height="18"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg> Dashboard
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'courses'" (click)="setTab('courses')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" width="18" height="18"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg> My Courses
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'create'" (click)="setTab('create')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg> Create Course
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'analytics'" (click)="setTab('analytics')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" width="18" height="18"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> Analytics
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'revenue'" (click)="setTab('revenue')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" width="18" height="18"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Revenue
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    
+    <!-- DASHBOARD TAB -->
+    @if (activeTab() === 'dashboard') {
+      <div class="header-area">
+        <h1>Instructor Dashboard</h1>
+        <p>Welcome back, {{ authSvc.currentUser()?.fullName }}</p>
+      </div>
+
+      <!-- Top Stats -->
+      <div class="stats-grid">
+        <div class="stat-card glass">
+          <span class="label"><span class="icon">👥</span> Total Students</span>
+          <span class="value">{{ totalStudents() | number }}</span>
+        </div>
+        <div class="stat-card glass">
+          <span class="label"><span class="icon">📚</span> Total Courses</span>
+          <span class="value">{{ courses().length }}</span>
+        </div>
+        <div class="stat-card glass">
+          <span class="label"><span class="icon">⭐</span> Avg. Rating</span>
+          <span class="value">{{ averageRating() | number:'1.1-1' }}</span>
+        </div>
+        <div class="stat-card glass">
+          <span class="label"><span class="icon">💵</span> Est. Revenue</span>
+          <span class="value">${{ totalRevenue() | number:'1.0-0' }}</span>
+        </div>
+      </div>
+
+      <!-- Recent Courses List -->
+      <div class="section-header">
+        <h2>My Courses</h2>
+        <button class="btn-ghost btn-sm" (click)="setTab('courses')">Manage all →</button>
+      </div>
+
+      <div class="courses-list">
+        @if (loading()) {
+          <div class="loading-state"><div class="spinner"></div></div>
+        } @else {
+          @for (course of courses() | slice:0:4; track course.courseId) {
+            <div class="course-list-item glass">
+              <div class="c-thumb" [style.background-image]="'url(' + (course.thumbnailUrl || 'assets/default-course.jpg') + ')'"></div>
+              <div class="c-info">
+                <h3>{{ course.title }}</h3>
+                <div class="c-meta">
+                  <span>👥 {{ course.enrollmentCount }}</span>
+                  <span>⭐ {{ course.averageRating || 0 }}</span>
+                  <span>💵 {{ course.price === 0 ? 'Free' : ('$' + course.price) }}</span>
+                </div>
+              </div>
+              <div class="c-status">
+                <span class="status-badge" [class.success]="course.isPublished">{{ course.isPublished ? (course.isApproved ? 'PUBLISHED' : 'PENDING') : 'DRAFT' }}</span>
+              </div>
+              @if (!course.isPublished) {
+                <button class="btn-primary btn-sm" (click)="publishCourse(course)">Publish</button>
+              }
+              <button class="btn-icon" title="View details" (click)="onAction('Course Editor')">👁️</button>
+            </div>
+          } @empty {
+            <div class="empty-state glass">
+              <p>You haven't created any courses yet.</p>
+              <button class="btn-primary mt-3" (click)="setTab('create')">Create Your First Course</button>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    <!-- COURSES TAB -->
+    @if (activeTab() === 'courses') {
+      <div class="header-area">
+        <h1>My Courses</h1>
+        <p>Manage your curriculum and track individual course performance.</p>
+      </div>
+      
+      <div class="courses-list full">
+        @for (course of courses(); track course.courseId) {
+          <div class="course-list-item glass">
+            <div class="c-thumb" [style.background-image]="'url(' + (course.thumbnailUrl || 'assets/default-course.jpg') + ')'"></div>
+            <div class="c-info">
+              <h3>{{ course.title }}</h3>
+              <div class="c-meta">
+                <span>{{ course.category }}</span>
+                <span>• {{ course.level }}</span>
+                <span>• {{ course.price === 0 ? 'Free' : ('$' + course.price) }}</span>
+              </div>
+            </div>
+            <div class="c-actions">
+              @if (!course.isPublished) {
+                <button class="btn-primary btn-sm" style="margin-right: 8px;" (click)="publishCourse(course)">Publish</button>
+              }
+              <button class="btn-ghost btn-sm" (click)="manageLessons(course)">Lessons</button>
+              <button class="btn-ghost btn-sm" (click)="onAction('Course Editor')">Edit</button>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state glass"><p>No courses found.</p></div>
+        }
+      </div>
+    }
+
+    <!-- CREATE COURSE TAB -->
+    @if (activeTab() === 'create') {
+      <div class="header-area text-center">
+        <h1>Create New Course</h1>
+        <p>Step {{ wizardStep() }} of 2</p>
+      </div>
+
+      <div class="wizard-progress">
+        <div class="step" [class.active]="wizardStep() === 1" [class.completed]="wizardStep() === 2">
+          <div class="circle">1</div> Basic Info
+        </div>
+        <div class="connector"></div>
+        <div class="step" [class.active]="wizardStep() === 2">
+          <div class="circle">2</div> Pricing & Details
+        </div>
+      </div>
+
+      <div class="wizard-container glass">
+        <form [formGroup]="courseForm">
+          
+          <!-- STEP 1 -->
+          @if (wizardStep() === 1) {
+            <div class="form-group">
+              <label>Course Title *</label>
+              <input type="text" formControlName="title" placeholder="e.g. Complete React Developer Course" class="form-control">
+            </div>
+            
+            <div class="form-group">
+              <label>Description *</label>
+              <textarea formControlName="description" rows="4" placeholder="Describe what students will learn in this course..." class="form-control"></textarea>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group half">
+                <label>Category</label>
+                <select formControlName="category" class="form-control">
+                  @for (cat of categories(); track cat) {
+                    <option [value]="cat">{{ cat }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-group half">
+                <label>Level</label>
+                <select formControlName="level" class="form-control">
+                  <option value="BEGINNER">Beginner</option>
+                  <option value="INTERMEDIATE">Intermediate</option>
+                  <option value="ADVANCED">Advanced</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="wizard-actions right">
+              <button type="button" class="btn-primary" (click)="nextStep()">Next →</button>
+            </div>
+          }
+
+          <!-- STEP 2 -->
+          @if (wizardStep() === 2) {
+            <div class="form-row">
+              <div class="form-group half">
+                <label>Language</label>
+                <select formControlName="language" class="form-control">
+                  <option value="English">English</option>
+                  <option value="Spanish">Spanish</option>
+                  <option value="French">French</option>
+                </select>
+              </div>
+              <div class="form-group half">
+                <label>Price ($) *</label>
+                <input type="number" formControlName="price" min="0" step="0.01" class="form-control" placeholder="0.00 for free">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Course Thumbnail (Optional)</label>
+              <input type="file" accept="image/*" (change)="onThumbnailSelected($event)" class="form-control">
+              <small class="text-muted">Recommended size: 1280x720px</small>
+            </div>
+
+            <div class="wizard-actions space-between">
+              <button type="button" class="btn-ghost" (click)="prevStep()">← Back</button>
+              <button type="button" class="btn-primary" [disabled]="submitting()" (click)="submitCourse()">
+                {{ submitting() ? 'Creating...' : 'Create Course' }}
+              </button>
+            </div>
+          }
+        </form>
+      </div>
+    }
+
+    <!-- ANALYTICS TAB -->
+    @if (activeTab() === 'analytics') {
+      <div class="header-area">
+        <h1>Analytics</h1>
+        <p>Performance overview for your courses.</p>
+      </div>
+      
+      <div class="stats-grid mb-4">
+        <div class="stat-card glass"><span class="label">Total Students</span><span class="value">{{ totalStudents() | number }}</span></div>
+        <div class="stat-card glass"><span class="label">Courses</span><span class="value">{{ courses().length }}</span></div>
+        <div class="stat-card glass"><span class="label">Avg. Rating</span><span class="value">{{ averageRating() | number:'1.1-1' }}</span></div>
+      </div>
+
+      <div class="chart-container glass">
+        <h3>Students per Course</h3>
+        <div class="bar-chart">
+          @for (course of courses(); track course.courseId) {
+            <div class="bar-item">
+              <div class="bar" [style.height.%]="course.enrollmentCount === 0 ? 5 : (course.enrollmentCount / (totalStudents() || 1) * 100)">
+                <span class="bar-value">{{ course.enrollmentCount }}</span>
+              </div>
+              <span class="bar-label">{{ course.title | slice:0:15 }}...</span>
+            </div>
+          } @empty {
+            <p class="text-muted">No data available to chart.</p>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- LESSONS TAB -->
+    @if (activeTab() === 'lessons') {
+      <div class="header-area flex-between">
+        <div>
+          <button class="btn-ghost btn-sm mb-2" (click)="setTab('courses')">← Back to Courses</button>
+          <h1>Manage Lessons</h1>
+          <p>Curriculum for: <strong>{{ selectedCourse()?.title }}</strong></p>
+        </div>
+      </div>
+
+      <div class="lesson-builder-grid">
+        
+        <!-- Left: Existing Lessons -->
+        <div class="lessons-list-col">
+          <div class="section-header mt-0">
+            <h2>Course Content</h2>
+          </div>
+          
+          <div class="lessons-list">
+            @for (lesson of courseLessons(); track lesson.lessonId; let i = $index) {
+              <div class="lesson-item glass">
+                <div class="lesson-drag-handle">☰</div>
+                <div class="lesson-info">
+                  <h4><span class="lesson-num">Lesson {{ i + 1 }}:</span> {{ lesson.title }}</h4>
+                  <div class="lesson-meta">
+                    <span class="badge">{{ lesson.contentType }}</span>
+                    <span>⏱ {{ lesson.durationMinutes }} min</span>
+                    @if (lesson.isPreview) { <span class="badge success">Free Preview</span> }
+                  </div>
+                </div>
+                <div class="lesson-actions">
+                  <button class="btn-icon" title="Edit">✏️</button>
+                  <button class="btn-icon text-danger" title="Delete">🗑️</button>
+                </div>
+              </div>
+            } @empty {
+              <div class="empty-state glass">
+                <p>No lessons added yet. Start building your curriculum!</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Right: Add Lesson Form -->
+        <div class="add-lesson-col">
+          <div class="wizard-container glass m-0">
+            <h3>Add New Lesson</h3>
+            <form [formGroup]="lessonForm" (ngSubmit)="submitLesson()">
+              <div class="form-group">
+                <label>Lesson Title *</label>
+                <input type="text" formControlName="title" class="form-control" placeholder="e.g. Introduction to Variables">
+              </div>
+
+              <div class="form-group">
+                <label>Description *</label>
+                <textarea formControlName="description" rows="3" class="form-control" placeholder="What will students learn here?"></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group half">
+                  <label>Content Type</label>
+                  <select formControlName="contentType" class="form-control">
+                    <option value="Video">Video</option>
+                    <option value="Article">Article</option>
+                    <option value="Quiz">Quiz</option>
+                  </select>
+                </div>
+                <div class="form-group half">
+                  <label>Duration (mins)</label>
+                  <input type="number" formControlName="durationMinutes" min="1" class="form-control">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Lesson Video (.mp4) *</label>
+                <input type="file" accept="video/mp4" (change)="onVideoSelected($event)" class="form-control">
+              </div>
+
+              <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="isPreview">
+                  <span class="checkmark"></span>
+                  Make this lesson a Free Preview
+                </label>
+              </div>
+
+              <div class="wizard-actions right">
+                <button type="submit" class="btn-primary" [disabled]="submittingLesson()">
+                  {{ submittingLesson() ? 'Adding...' : '+ Add Lesson' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    }
+
+  </main>
+</div>

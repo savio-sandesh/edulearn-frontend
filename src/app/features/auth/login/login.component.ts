@@ -36,7 +36,13 @@ export class LoginComponent {
     this.auth.login({ email: this.email.value!, password: this.password.value! }).subscribe({
       next: () => {
         this.toast.success('Welcome back! 🎉');
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] ?? '/dashboard';
+        let returnUrl = this.route.snapshot.queryParams['returnUrl'];
+        if (!returnUrl || returnUrl === '/') {
+          const role = this.auth.userRole();
+          if (role === 'INSTRUCTOR') returnUrl = '/instructor';
+          else if (role === 'ADMIN') returnUrl = '/admin';
+          else returnUrl = '/dashboard';
+        }
         this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {

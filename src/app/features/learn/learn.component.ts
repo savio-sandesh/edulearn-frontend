@@ -33,7 +33,7 @@ export class LearnComponent implements OnInit {
   sidebarOpen = signal(true);
 
   safeVideoUrl = computed<SafeResourceUrl | null>(() => {
-    const url = this.current()?.videoUrl;
+    const url = this.current()?.contentUrl;
     if (!url) return null;
     return this.sanitizer.bypassSecurityTrustResourceUrl(this.toEmbedUrl(url));
   });

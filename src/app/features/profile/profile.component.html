@@ -1,0 +1,92 @@
+<div class="profile-page">
+  <div class="profile-header">
+    <h1>Account Settings</h1>
+    <p>Manage your profile information and security settings.</p>
+  </div>
+
+  <div class="settings-grid">
+    
+    <!-- Profile Info Card -->
+    <div class="settings-card">
+      <h2>Profile Information</h2>
+      
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        
+        <div class="avatar-section">
+          <div class="avatar-img" 
+               [style.background-image]="'url(' + (avatarPreview() || user()?.avatarUrl || 'https://ui-avatars.com/api/?name=' + (user()?.fullName || 'User') + '&background=random') + ')'">
+          </div>
+          <div class="avatar-actions">
+            <label class="btn-outline">
+              Change Avatar
+              <input type="file" hidden accept="image/*" (change)="onFileSelected($event)">
+            </label>
+            <p class="help-text">JPG, GIF or PNG. Max size of 800K</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" formControlName="fullName" placeholder="e.g. Jane Doe" class="form-control">
+          @if (profileForm.get('fullName')?.touched && profileForm.get('fullName')?.invalid) {
+            <span class="error-msg">Full name is required.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <!-- Email is typically read-only or requires a verification flow, so we just display it -->
+          <input type="email" [value]="user()?.email" readonly class="form-control read-only">
+          <span class="help-text">Email address cannot be changed directly.</span>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="profileForm.invalid || updatingProfile()">
+            @if (updatingProfile()) { <span class="spin"></span> Saving... }
+            @else { Save Changes }
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-right">
+      <!-- Security Card -->
+      <div class="settings-card">
+        <h2>Security</h2>
+        
+        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" formControlName="currentPassword" class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" formControlName="newPassword" class="form-control">
+            @if (passwordForm.get('newPassword')?.touched && passwordForm.get('newPassword')?.errors?.['minlength']) {
+              <span class="error-msg">Password must be at least 8 characters.</span>
+            }
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-secondary" [disabled]="passwordForm.invalid || updatingPassword()">
+              @if (updatingPassword()) { <span class="spin"></span> Updating... }
+              @else { Update Password }
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Account Actions -->
+      <div class="settings-card danger-zone">
+        <h2>Danger Zone</h2>
+        <p>Once you delete your account, there is no going back. Please be certain.</p>
+        <button class="btn-danger">Deactivate Account</button>
+      </div>
+      
+      <div class="settings-card mt-4">
+        <button class="btn-outline w-100" (click)="logout()">Sign Out</button>
+      </div>
+    </div>
+  </div>
+</div>

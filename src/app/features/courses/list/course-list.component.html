@@ -32,7 +32,7 @@
     <aside class="filters">
       <div class="filter-group">
         <h3>Category</h3>
-        @for (cat of categories; track cat) {
+        @for (cat of categories(); track cat) {
           <button
             class="filter-btn"
             [class.active]="selectedCategory() === cat"

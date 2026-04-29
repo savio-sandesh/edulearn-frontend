@@ -1,6 +1,6 @@
-﻿import { Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Course, CourseCreateRequest, CourseUpdateRequest, Review, ReviewCreateRequest } from '../models';
 
@@ -30,7 +30,7 @@ export class CourseService {
         }
       });
     }
-    return this.http.get<Course[]>(this.base, { params });
+    return this.http.get<Course[]>(`${this.base}/published`, { params });
   }
 
   /** Fetch a single course by ID. */
@@ -40,7 +40,12 @@ export class CourseService {
 
   /** Fetch all courses by a specific instructor. */
   getByInstructor(instructorId: number): Observable<Course[]> {
-    return this.http.get<Course[]>(`${this.base}/instructor/${instructorId}`);
+    return this.http.get<Course[]>(`${this.base}/byInstructor/${instructorId}`);
+  }
+
+  /** Fetch all available categories from the backend. */
+  getCategories(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.base}/categories`);
   }
 
   /** Create a new course (instructor/admin only). */
@@ -58,10 +63,14 @@ export class CourseService {
     return this.http.delete<{ message: string }>(`${this.base}/${id}`);
   }
 
-  /** Upload or replace a course thumbnail. */
+  /** Publish a course (Sends to Admin for approval). */
+  publish(id: number): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.base}/publish/${id}`, {});
+  }
+
   uploadThumbnail(id: number, file: File): Observable<{ thumbnailUrl: string }> {
     const form = new FormData();
-    form.append('thumbnail', file);
+    form.append('File', file);
     return this.http.post<{ thumbnailUrl: string }>(`${this.base}/${id}/thumbnail`, form);
   }
 
@@ -69,7 +78,9 @@ export class CourseService {
 
   /** Get all reviews for a course. */
   getReviews(courseId: number): Observable<Review[]> {
-    return this.http.get<Review[]>(`${this.base}/${courseId}/reviews`);
+    // Backend currently does not have a GET endpoint for reviews.
+    // Returning an empty array to prevent 404 browser console errors.
+    return of([] as Review[]);
   }
 
   /** Submit a review for a course. */
@@ -80,5 +91,27 @@ export class CourseService {
   /** Delete a review. */
   deleteReview(courseId: number, reviewId: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.base}/${courseId}/reviews/${reviewId}`);
+  }
+
+  /** Increment enrollment count. */
+  incrementEnrollment(courseId: number): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/${courseId}/enrollments/increment`, {});
+  }
+
+  // --- Admin Endpoints ---
+
+  /** Get all courses pending approval. (Admin only) */
+  getPending(): Observable<Course[]> {
+    return this.http.get<Course[]>(`${this.base}/pending`);
+  }
+
+  /** Approve a course for publishing. (Admin only) */
+  approve(courseId: number): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.base}/approve/${courseId}`, {});
+  }
+
+  /** Reject a course from publishing. (Admin only) */
+  reject(courseId: number): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.base}/reject/${courseId}`, {});
   }
 }

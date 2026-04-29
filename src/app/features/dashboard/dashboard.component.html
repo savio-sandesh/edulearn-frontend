@@ -1,0 +1,107 @@
+<div class="dashboard-page">
+  <!-- Header -->
+  <div class="dash-header">
+    <div class="user-info">
+      <h1>Welcome back, {{ user()?.fullName?.split(' ')?.[0] ?? 'Student' }}!</h1>
+      <p>Ready to continue your learning journey?</p>
+    </div>
+    
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-num">{{ activeCourses().length }}</span>
+        <span class="stat-label">Active Courses</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">{{ completedCourses().length }}</span>
+        <span class="stat-label">Completed</span>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading your courses...</p>
+    </div>
+  } @else {
+    <!-- Active Courses -->
+    <section class="course-section">
+      <div class="section-head">
+        <h2>In Progress</h2>
+        @if (activeCourses().length === 0) {
+          <a routerLink="/courses" class="browse-link">Browse Courses →</a>
+        }
+      </div>
+
+      @if (activeCourses().length > 0) {
+        <div class="course-grid">
+          @for (course of activeCourses(); track course.enrollmentId) {
+            <div class="course-card active-card">
+              <div class="card-img" [style.background-image]="'url(' + (course.courseThumbnailUrl || 'assets/default-course.jpg') + ')'">
+                <div class="img-overlay"></div>
+              </div>
+              <div class="card-content">
+                <span class="category-badge">{{ course.courseCategory ?? 'Course' }}</span>
+                <h3>{{ course.courseTitle }}</h3>
+                
+                <div class="progress-wrap">
+                  <div class="prog-meta">
+                    <span>Progress</span>
+                    <span>{{ course.progress }}%</span>
+                  </div>
+                  <div class="prog-bar">
+                    <div class="prog-fill" [style.width.%]="course.progress"></div>
+                  </div>
+                </div>
+
+                <a [routerLink]="['/courses', course.courseId, 'learn']" class="btn-action">
+                  Continue Learning
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <div class="empty-icon">📚</div>
+          <p>You have no active courses.</p>
+          <a routerLink="/courses" class="btn-primary">Find a Course</a>
+        </div>
+      }
+    </section>
+
+    <!-- Completed Courses -->
+    @if (completedCourses().length > 0) {
+      <section class="course-section mt-5">
+        <div class="section-head">
+          <h2>Completed Courses</h2>
+        </div>
+
+        <div class="course-grid">
+          @for (course of completedCourses(); track course.enrollmentId) {
+            <div class="course-card completed-card">
+              <div class="card-img" [style.background-image]="'url(' + (course.courseThumbnailUrl || 'assets/default-course.jpg') + ')'">
+                <div class="completed-badge">✓ Completed</div>
+              </div>
+              <div class="card-content">
+                <h3>{{ course.courseTitle }}</h3>
+                <p class="completion-date">Completed on {{ course.completedAt | date:'mediumDate' }}</p>
+                
+                <div class="card-actions">
+                  <a [routerLink]="['/courses', course.courseId, 'learn']" class="btn-text">
+                    Review Material
+                  </a>
+                  @if (course.hasCertificate) {
+                    <a [routerLink]="['/certificates', course.courseId]" class="btn-cert">
+                      View Certificate
+                    </a>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>

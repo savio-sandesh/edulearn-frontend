@@ -1,0 +1,62 @@
+<div class="admin-layout">
+  
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <button class="nav-item" [class.active]="activeTab() === 'dashboard'" (click)="setTab('dashboard')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" width="18" height="18"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg> Dashboard
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'approvals'" (click)="setTab('approvals')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" width="18" height="18"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Approvals
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="content-area">
+    
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading admin data...</p>
+      </div>
+    } @else {
+
+      @if (activeTab() === 'approvals') {
+        <div class="header-area">
+          <h1>Course Approvals</h1>
+          <p>Review courses submitted by instructors before publishing.</p>
+        </div>
+
+        <div class="approvals-grid">
+          @for (course of pendingCourses(); track course.courseId) {
+            <div class="course-card glass">
+              <div class="card-content">
+                <div class="c-meta">
+                  <span class="badge">{{ course.category }}</span>
+                  <span class="badge badge-outline">{{ course.level }}</span>
+                </div>
+                <h3>{{ course.title }}</h3>
+                <p class="desc">{{ course.description | slice:0:100 }}...</p>
+                <div class="c-details">
+                  <span>💵 ${{ course.price | number:'1.2-2' }}</span>
+                  <span>⏱ {{ course.totalDuration }} min</span>
+                </div>
+              </div>
+              <div class="card-actions">
+                <button class="btn-success btn-full" (click)="approveCourse(course)">✓ Approve</button>
+                <button class="btn-danger btn-full" (click)="rejectCourse(course)">✕ Reject</button>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-state glass">
+              <h3>All caught up!</h3>
+              <p>There are no courses waiting for approval right now.</p>
+            </div>
+          }
+        </div>
+      }
+
+    }
+  </main>
+</div>

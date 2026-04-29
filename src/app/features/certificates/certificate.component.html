@@ -1,0 +1,66 @@
+<div class="cert-page">
+  <div class="nav-actions hide-print">
+    <a routerLink="/dashboard" class="btn-back">← Back to Dashboard</a>
+    @if (certificate()) {
+      <button class="btn-print" (click)="printCertificate()">🖨️ Print / Save PDF</button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="center-state">
+      <div class="spinner"></div>
+      <p>Loading certificate...</p>
+    </div>
+  } @else if (error()) {
+    <div class="center-state error">
+      <div class="icon">⚠️</div>
+      <h2>Certificate Unavailable</h2>
+      <p>This certificate either doesn't exist or you haven't completed the course yet.</p>
+    </div>
+  } @else if (certificate()) {
+    <!-- The actual printable certificate -->
+    <div class="cert-container">
+      <div class="cert-border-outer">
+        <div class="cert-border-inner">
+          
+          <div class="cert-header">
+            <h1 class="brand-title">EduLearn</h1>
+            <p class="subtitle">Certificate of Completion</p>
+          </div>
+
+          <div class="cert-body">
+            <p class="presented-to">This is to certify that</p>
+            <h2 class="student-name">{{ certificate()!.studentName }}</h2>
+            <p class="completed-text">has successfully completed the course</p>
+            <h3 class="course-title">{{ certificate()!.courseTitle }}</h3>
+          </div>
+
+          <div class="cert-footer">
+            <div class="footer-col">
+              <span class="line"></span>
+              <span class="label">Date Issued</span>
+              <span class="value">{{ certificate()!.issuedAt | date:'longDate' }}</span>
+            </div>
+            
+            <div class="seal-col">
+              <div class="seal">
+                <div class="seal-inner">
+                  <span class="star">★</span>
+                  <span>VERIFIED</span>
+                </div>
+              </div>
+              <div class="cert-id">ID: {{ certificate()!.certificateId | number:'6.0-0' | slice:0:6 }}</div>
+            </div>
+
+            <div class="footer-col">
+              <span class="signature">EduLearn Platform</span>
+              <span class="line"></span>
+              <span class="label">Authorized Signature</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  }
+</div>

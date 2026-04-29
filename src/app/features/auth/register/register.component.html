@@ -91,6 +91,14 @@
               <span>Share your knowledge</span>
             </div>
           </label>
+          <label class="role-option" [class.selected]="role.value === 'ADMIN'">
+            <input type="radio" formControlName="role" value="ADMIN" />
+            <div class="role-icon">🛡️</div>
+            <div>
+              <strong>Admin</strong>
+              <span>System management</span>
+            </div>
+          </label>
         </div>
       </div>
 
