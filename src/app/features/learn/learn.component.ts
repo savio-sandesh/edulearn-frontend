@@ -97,6 +97,10 @@ export class LearnComponent implements OnInit {
         this.progress.update(list => [...list, prog]);
         this.marking.set(false);
         this.toast.success('Lesson marked as complete! ?');
+        
+        // Notify Enrollment API to update its ProgressPercent for this course
+        this.enrollSvc.updateCourseProgress(this.courseId()).subscribe();
+        
         this.goNext();
       },
       error: (_err: unknown) => {

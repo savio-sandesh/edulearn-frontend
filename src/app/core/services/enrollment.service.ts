@@ -52,6 +52,11 @@ export class EnrollmentService {
     });
   }
 
+  /** Update course progress in the enrollment database. */
+  updateCourseProgress(courseId: number): Observable<Enrollment> {
+    return this.http.put<Enrollment>(`${this.base}/progress/byCourse/${courseId}`, {});
+  }
+
   /** Get lesson progress for a course. */
   getLessonProgress(courseId: number): Observable<LessonProgress[]> {
     const studentId = this.authSvc.currentUser()?.userId;

@@ -40,7 +40,7 @@ export class DashboardComponent implements OnInit {
         let mapped = data.map(e => ({
           ...e,
           progress: e.progressPercent || 0,
-          isCompleted: e.status === 'COMPLETED',
+          isCompleted: e.status === 'COMPLETED' || e.status === 2,
           hasCertificate: e.certificateIssued || false
         } as Enrollment));
 
