@@ -22,6 +22,7 @@ export class AdminComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
   readonly pendingCourses = signal<Course[]>([]);
+  readonly pendingDeleteCourses = signal<Course[]>([]);
   readonly allCourses = signal<Course[]>([]);
   readonly users = signal<User[]>([]);
   readonly categories = signal<string[]>([]);
@@ -34,6 +35,7 @@ export class AdminComponent implements OnInit {
   // Dashboard computed stats
   readonly totalCourses = computed(() => this.allCourses().length);
   readonly pendingCount = computed(() => this.pendingCourses().length);
+  readonly pendingDeleteCount = computed(() => this.pendingDeleteCourses().length);
   readonly totalUsers = computed(() => this.users().length);
   
   // Chart computed states
@@ -68,16 +70,11 @@ export class AdminComponent implements OnInit {
   });
 
   // Approvals view
-  approvalTab = signal<'All' | 'Pending' | 'Published' | 'Rejected'>('All');
+  approvalTab = signal<'Pending Approval' | 'Pending Delete'>('Pending Approval');
   readonly filteredCourses = computed(() => {
-    // For now we only track pending locally to match previous behavior, 
-    // but published courses are available in allCourses.
     const tab = this.approvalTab();
-    if (tab === 'Pending') return this.pendingCourses();
-    if (tab === 'Published') return this.allCourses();
-    // Default show pending in approvals view if 'All' is selected, plus published?
-    // Let's just show pending courses when they switch to approvals like the old view for simplicity,
-    // or merge all if "All" is selected.
+    if (tab === 'Pending Approval') return this.pendingCourses();
+    if (tab === 'Pending Delete') return this.pendingDeleteCourses();
     return this.pendingCourses();
   });
 
@@ -91,6 +88,7 @@ export class AdminComponent implements OnInit {
     // Fetch Everything in parallel
     forkJoin({
       pending: this.courseSvc.getPending(),
+      pendingDelete: this.courseSvc.getPendingDelete(),
       courses: this.courseSvc.getAll(),
       students: this.authSvc.getUsersByRole('STUDENT'),
       instructors: this.authSvc.getUsersByRole('INSTRUCTOR'),
@@ -99,6 +97,7 @@ export class AdminComponent implements OnInit {
     }).subscribe({
       next: (data) => {
         this.pendingCourses.set(data.pending);
+        this.pendingDeleteCourses.set(data.pendingDelete);
         this.allCourses.set(data.courses);
         this.users.set([...data.students, ...data.instructors, ...data.admins]);
         this.categories.set(data.categories);
@@ -131,6 +130,26 @@ export class AdminComponent implements OnInit {
         this.pendingCourses.update(courses => courses.filter(c => c.courseId !== course.courseId));
       },
       error: (err) => this.toast.error(err.error?.message || 'Failed to reject course.')
+    });
+  }
+
+  approveDelete(course: Course): void {
+    this.courseSvc.delete(course.courseId).subscribe({
+      next: () => {
+        this.toast.success(`Course "${course.title}" has been deleted.`);
+        this.pendingDeleteCourses.update(courses => courses.filter(c => c.courseId !== course.courseId));
+      },
+      error: (err) => this.toast.error(err.error?.message || 'Failed to delete course.')
+    });
+  }
+
+  rejectDelete(course: Course): void {
+    this.courseSvc.rejectDelete(course.courseId).subscribe({
+      next: () => {
+        this.toast.info(`Course delete request for "${course.title}" rejected.`);
+        this.pendingDeleteCourses.update(courses => courses.filter(c => c.courseId !== course.courseId));
+      },
+      error: (err) => this.toast.error(err.error?.message || 'Failed to reject delete request.')
     });
   }
 

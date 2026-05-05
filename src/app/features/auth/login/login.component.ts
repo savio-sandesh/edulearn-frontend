@@ -43,7 +43,9 @@ export class LoginComponent {
           else if (role === 'ADMIN') returnUrl = '/admin';
           else returnUrl = '/dashboard';
         }
-        this.router.navigateByUrl(returnUrl);
+        this.router.navigateByUrl(returnUrl).then((navigated) => {
+          if (!navigated) this.loading.set(false);
+        });
       },
       error: (err) => {
         this.toast.error(err.error?.message ?? 'Invalid email or password.');

@@ -107,6 +107,28 @@ h1 {
 .review-stars  { margin-left: auto; }
 .review-comment { color: #94a3b8; font-size: 0.875rem; line-height: 1.7; }
 
+/* Leave Review Box */
+.leave-review-box {
+  background: #111122; border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px; padding: 20px;
+  h3 { font-size: 1rem; color: #e2e8f0; margin-bottom: 12px; }
+  .review-stars-input {
+    display: flex; gap: 4px; margin-bottom: 12px;
+    .star-btn {
+      background: none; border: none; font-size: 1.5rem; color: #334155; cursor: pointer;
+      transition: color 0.2s; padding: 0; line-height: 1;
+      &.active, &:hover { color: #f59e0b; }
+    }
+  }
+}
+.form-control {
+  width: 100%; padding: 12px; border-radius: 8px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  color: #f1f5f9; font-size: 0.9rem; font-family: inherit;
+  resize: vertical;
+  &:focus { outline: none; border-color: rgba(124,58,237,0.5); background: rgba(255,255,255,0.06); }
+}
+
 /* ── Enrollment Card ──────────────────────────────────── */
 .enroll-card {
   background: #111122; border: 1px solid rgba(255,255,255,0.09);

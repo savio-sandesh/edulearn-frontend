@@ -5,8 +5,10 @@
     <a routerLink="/" class="logo" (click)="closeMenu()">
       <div class="logo-icon">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.95 49.95 0 0 0-9.902 3.912l-.003.002-.34.18a.75.75 0 0 1-.707 0A50.01 50.01 0 0 0 7.5 12.174v-.224c0-.131.067-.248.172-.311a54.614 54.614 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.13 56.13 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.8 49.8 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z"/>
-          <path d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.285a.75.75 0 0 1-.46.71 47.878 47.878 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.877 47.877 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286A48.4 48.4 0 0 1 6 13.18v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.661a6.73 6.73 0 0 0 .551-1.608 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.668 2.25 2.25 0 0 0 2.12 0Z"/>
+          <path
+            d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.95 49.95 0 0 0-9.902 3.912l-.003.002-.34.18a.75.75 0 0 1-.707 0A50.01 50.01 0 0 0 7.5 12.174v-.224c0-.131.067-.248.172-.311a54.614 54.614 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.13 56.13 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.8 49.8 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z" />
+          <path
+            d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.285a.75.75 0 0 1-.46.71 47.878 47.878 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.877 47.877 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286A48.4 48.4 0 0 1 6 13.18v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.661a6.73 6.73 0 0 0 .551-1.608 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.668 2.25 2.25 0 0 0 2.12 0Z" />
         </svg>
       </div>
       <span class="logo-text">Edu<span class="logo-accent">Learn</span></span>
@@ -16,72 +18,91 @@
     <div class="nav-links">
       <a routerLink="/courses" routerLinkActive="active" class="nav-link">Courses</a>
       @if (auth.isStudent()) {
-        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</a>
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</a>
       }
       @if (auth.isInstructor()) {
-        <a routerLink="/instructor" routerLinkActive="active" class="nav-link">Teach</a>
+      <a routerLink="/instructor" routerLinkActive="active" class="nav-link">Instructor</a>
       }
       @if (auth.isAdmin()) {
-        <a routerLink="/admin" routerLinkActive="active" class="nav-link">Admin</a>
+      <a routerLink="/admin" routerLinkActive="active" class="nav-link">Admin</a>
       }
     </div>
 
     <!-- Right Controls -->
     <div class="nav-actions">
       @if (auth.isLoggedIn()) {
-        <div class="user-menu">
-          <button class="avatar-btn" (click)="toggleDropdown()">
-            @if (auth.currentUser()?.avatarUrl) {
-              <img [src]="auth.currentUser()!.avatarUrl" alt="avatar" class="avatar-img" />
-            } @else {
-              <span class="avatar-initials">{{ getInitials() }}</span>
-            }
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="12" height="12" class="chevron">
-              <path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"/>
-            </svg>
-          </button>
-
-          @if (dropdownOpen()) {
-            <div class="dropdown">
-              <div class="dropdown-header">
-                <p class="dd-name">{{ auth.currentUser()?.fullName }}</p>
-                <p class="dd-email">{{ auth.currentUser()?.email }}</p>
-                <span class="dd-role">{{ auth.currentUser()?.role }}</span>
-              </div>
-              <hr class="dd-divider" />
-              <a routerLink="/profile" class="dd-item" (click)="dropdownOpen.set(false)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z"/></svg>
-                Profile
-              </a>
-              @if (auth.isStudent()) {
-                <a routerLink="/dashboard" class="dd-item" (click)="dropdownOpen.set(false)">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z"/></svg>
-                  Dashboard
-                </a>
-              }
-              @if (auth.isInstructor()) {
-                <a routerLink="/instructor" class="dd-item" (click)="dropdownOpen.set(false)">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z"/></svg>
-                  Instructor Panel
-                </a>
-              }
-              @if (auth.isAdmin()) {
-                <a routerLink="/admin" class="dd-item" (click)="dropdownOpen.set(false)">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z"/></svg>
-                  Admin Panel
-                </a>
-              }
-              <hr class="dd-divider" />
-              <button class="dd-item danger" (click)="logout()">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 0 1 5.25 2h5.5A2.25 2.25 0 0 1 13 4.25v2a.75.75 0 0 1-1.5 0v-2a.75.75 0 0 0-.75-.75h-5.5a.75.75 0 0 0-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 0 0 .75-.75v-2a.75.75 0 0 1 1.5 0v2A2.25 2.25 0 0 1 10.75 18h-5.5A2.25 2.25 0 0 1 3 15.75V4.25Z"/><path fill-rule="evenodd" d="M6 10a.75.75 0 0 1 .75-.75h9.546l-1.048-.943a.75.75 0 1 1 1.004-1.114l2.5 2.25a.75.75 0 0 1 0 1.114l-2.5 2.25a.75.75 0 1 1-1.004-1.114l1.048-.943H6.75A.75.75 0 0 1 6 10Z"/></svg>
-                Sign out
-              </button>
-            </div>
+      <div class="user-menu">
+        <button class="avatar-btn" (click)="toggleDropdown()">
+          @if (auth.currentUser()?.avatarUrl) {
+          <img [src]="auth.currentUser()!.avatarUrl" alt="avatar" class="avatar-img" />
+          } @else {
+          <span class="avatar-initials">{{ getInitials() }}</span>
           }
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="12" height="12"
+            class="chevron">
+            <path fill-rule="evenodd"
+              d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" />
+          </svg>
+        </button>
+
+        @if (dropdownOpen()) {
+        <div class="dropdown">
+          <div class="dropdown-header">
+            <p class="dd-name">{{ auth.currentUser()?.fullName }}</p>
+            <p class="dd-email">{{ auth.currentUser()?.email }}</p>
+            <span class="dd-role">{{ auth.currentUser()?.role }}</span>
+          </div>
+          <hr class="dd-divider" />
+          <a routerLink="/profile" class="dd-item" (click)="dropdownOpen.set(false)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15">
+              <path
+                d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z" />
+            </svg>
+            Profile
+          </a>
+          @if (auth.isStudent()) {
+          <a routerLink="/dashboard" class="dd-item" (click)="dropdownOpen.set(false)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15">
+              <path fill-rule="evenodd"
+                d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z" />
+            </svg>
+            Dashboard
+          </a>
+          }
+          @if (auth.isInstructor()) {
+          <a routerLink="/instructor" class="dd-item" (click)="dropdownOpen.set(false)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15">
+              <path fill-rule="evenodd"
+                d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z" />
+            </svg>
+            Instructor Panel
+          </a>
+          }
+          @if (auth.isAdmin()) {
+          <a routerLink="/admin" class="dd-item" (click)="dropdownOpen.set(false)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15">
+              <path fill-rule="evenodd"
+                d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z" />
+            </svg>
+            Admin Panel
+          </a>
+          }
+          <hr class="dd-divider" />
+          <button class="dd-item danger" (click)="logout()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15">
+              <path fill-rule="evenodd"
+                d="M3 4.25A2.25 2.25 0 0 1 5.25 2h5.5A2.25 2.25 0 0 1 13 4.25v2a.75.75 0 0 1-1.5 0v-2a.75.75 0 0 0-.75-.75h-5.5a.75.75 0 0 0-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 0 0 .75-.75v-2a.75.75 0 0 1 1.5 0v2A2.25 2.25 0 0 1 10.75 18h-5.5A2.25 2.25 0 0 1 3 15.75V4.25Z" />
+              <path fill-rule="evenodd"
+                d="M6 10a.75.75 0 0 1 .75-.75h9.546l-1.048-.943a.75.75 0 1 1 1.004-1.114l2.5 2.25a.75.75 0 0 1 0 1.114l-2.5 2.25a.75.75 0 1 1-1.004-1.114l1.048-.943H6.75A.75.75 0 0 1 6 10Z" />
+            </svg>
+            Sign out
+          </button>
         </div>
+        }
+      </div>
       } @else {
-        <a routerLink="/login"    class="btn-ghost">Sign in</a>
-        <a routerLink="/register" class="btn-primary">Get Started</a>
+      <a routerLink="/login" class="btn-ghost">Sign in</a>
+      <a routerLink="/register" class="btn-primary">Get Started</a>
       }
 
       <!-- Hamburger -->
@@ -93,26 +114,26 @@
 
   <!-- Mobile Menu -->
   @if (menuOpen()) {
-    <div class="mobile-menu">
-      <a routerLink="/courses" routerLinkActive="active" class="m-link" (click)="closeMenu()">Courses</a>
-      @if (auth.isLoggedIn()) {
-        <a routerLink="/profile" routerLinkActive="active" class="m-link" (click)="closeMenu()">Profile</a>
-      }
-      @if (auth.isStudent()) {
-        <a routerLink="/dashboard" routerLinkActive="active" class="m-link" (click)="closeMenu()">Dashboard</a>
-      }
-      @if (auth.isInstructor()) {
-        <a routerLink="/instructor" routerLinkActive="active" class="m-link" (click)="closeMenu()">Teach</a>
-      }
-      @if (auth.isAdmin()) {
-        <a routerLink="/admin" routerLinkActive="active" class="m-link" (click)="closeMenu()">Admin</a>
-      }
-      @if (!auth.isLoggedIn()) {
-        <a routerLink="/login"    class="m-link" (click)="closeMenu()">Sign In</a>
-        <a routerLink="/register" class="m-link accent" (click)="closeMenu()">Get Started →</a>
-      } @else {
-        <button class="m-link danger" (click)="logout()">Sign Out</button>
-      }
-    </div>
+  <div class="mobile-menu">
+    <a routerLink="/courses" routerLinkActive="active" class="m-link" (click)="closeMenu()">Courses</a>
+    @if (auth.isLoggedIn()) {
+    <a routerLink="/profile" routerLinkActive="active" class="m-link" (click)="closeMenu()">Profile</a>
+    }
+    @if (auth.isStudent()) {
+    <a routerLink="/dashboard" routerLinkActive="active" class="m-link" (click)="closeMenu()">Dashboard</a>
+    }
+    @if (auth.isInstructor()) {
+    <a routerLink="/instructor" routerLinkActive="active" class="m-link" (click)="closeMenu()">Instructor</a>
+    }
+    @if (auth.isAdmin()) {
+    <a routerLink="/admin" routerLinkActive="active" class="m-link" (click)="closeMenu()">Admin</a>
+    }
+    @if (!auth.isLoggedIn()) {
+    <a routerLink="/login" class="m-link" (click)="closeMenu()">Sign In</a>
+    <a routerLink="/register" class="m-link accent" (click)="closeMenu()">Get Started →</a>
+    } @else {
+    <button class="m-link danger" (click)="logout()">Sign Out</button>
+    }
+  </div>
   }
 </nav>

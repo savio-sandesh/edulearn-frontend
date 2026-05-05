@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { CourseService } from '../../../core/services/course.service';
+import { ContentService } from '../../../core/services/content.service';
 import { EnrollmentService } from '../../../core/services/enrollment.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -19,15 +20,17 @@ import { LoaderComponent } from '../../../shared/components/loader/loader.compon
 export class CourseDetailComponent implements OnInit {
   private readonly route      = inject(ActivatedRoute);
   private readonly coursesSvc = inject(CourseService);
+  private readonly contentSvc = inject(ContentService);
   private readonly enrollSvc  = inject(EnrollmentService);
   private readonly toast      = inject(ToastService);
   readonly auth               = inject(AuthService);
 
-  course     = signal<Course | null>(null);
-  reviews    = signal<Review[]>([]);
-  loading    = signal(true);
-  isEnrolled = signal(false);
-  enrolling  = signal(false);
+  course       = signal<Course | null>(null);
+  reviews      = signal<Review[]>([]);
+  loading      = signal(true);
+  isEnrolled   = signal(false);
+  enrolling    = signal(false);
+  totalDuration = signal(0);
   checkingEnrollment = signal(false);
 
   ngOnInit(): void {
@@ -43,12 +46,20 @@ export class CourseDetailComponent implements OnInit {
         this.course.set(course);
         this.loading.set(false);
         this.loadReviews(id);
+        this.loadTotalDuration(id);
         if (this.auth.isLoggedIn()) this.checkEnrollment(id);
       },
       error: () => {
         this.toast.error('Course not found.');
         this.loading.set(false);
       },
+    });
+  }
+
+  private loadTotalDuration(courseId: number): void {
+    this.contentSvc.getTotalDuration(courseId).subscribe({
+      next: (res) => this.totalDuration.set(res.totalMinutes),
+      error: () => {}
     });
   }
 
@@ -98,4 +109,43 @@ export class CourseDetailComponent implements OnInit {
   }
 
   get starArray(): number[] { return [1, 2, 3, 4, 5]; }
+
+  reviewRating = signal(0);
+  reviewComment = signal('');
+  submittingReview = signal(false);
+
+  setRating(r: number) {
+    this.reviewRating.set(r);
+  }
+
+  updateComment(event: Event) {
+    this.reviewComment.set((event.target as HTMLTextAreaElement).value);
+  }
+
+  submitReview() {
+    if (this.reviewRating() === 0) {
+      this.toast.error('Please select a rating.');
+      return;
+    }
+    const c = this.course();
+    if (!c) return;
+
+    this.submittingReview.set(true);
+    this.coursesSvc.addReview(c.courseId, {
+      rating: this.reviewRating(),
+      comment: this.reviewComment()
+    }).subscribe({
+      next: (rev) => {
+        this.toast.success('Review submitted successfully!');
+        this.reviews.update(list => [rev, ...list]);
+        this.reviewRating.set(0);
+        this.reviewComment.set('');
+        this.submittingReview.set(false);
+      },
+      error: (err) => {
+        this.toast.error(err.error?.message || 'Failed to submit review.');
+        this.submittingReview.set(false);
+      }
+    });
+  }
 }

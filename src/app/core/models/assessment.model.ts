@@ -1,38 +1,51 @@
+// ── Quiz Question (used by instructor builder in learn/quiz components) ──────
+
+/** Option shape used in the standalone quiz.component (old dedicated quiz page) */
 export interface QuizOption {
-  optionId: string; // e.g. "A", "B", "C", "D"
+  optionId: string; // "A", "B", "C", "D"
   text: string;
 }
 
+/** Question shape used by quiz.component (standalone quiz page) */
 export interface Question {
   questionId: number;
   text: string;
   options: QuizOption[];
-  // correctAnswer not sent to students — only after submission
+  /** Only present after submission — not sent to students during attempt */
   correctAnswer?: string;
 }
 
+/** Question shape used by learn.component's inline quiz panel builder */
+export interface QuizQuestion {
+  id: number;
+  text: string;
+  options: { id: string; text: string }[];
+  correctOptionId: string;
+}
+
+// ── Quiz (returned from Assessment API) ──────────────────────────────────────
+
+/** The Quiz object returned from the backend */
 export interface Quiz {
   quizId: number;
   courseId: number;
-  lessonId: number;
+  lessonId?: number | null;
   title: string;
-  description: string;
-  passingScore: number; // e.g. 70 (percent)
-  maxAttempts: number;
-  isPublished: boolean;
-  questions: Question[];
-}
-
-export interface QuizCreateRequest {
-  courseId: number;
-  lessonId: number;
-  title: string;
-  description: string;
+  description: string;   // stores question content JSON (array of QuizQuestion without correctOptionId)
+  timeLimitMinutes: number;
   passingScore: number;
   maxAttempts: number;
-  questions: Question[];
+  isPublished: boolean;
+  questionsJson: string; // raw JSON: { [questionId]: correctOptionId } — graded server-side
+  createdAt: string;
+
+  /** Populated client-side after parsing description; NOT from the API */
+  questions?: Question[];
 }
 
+// ── Attempt ──────────────────────────────────────────────────────────────────
+
+/** A student's quiz attempt result */
 export interface QuizAttempt {
   attemptId: number;
   quizId: number;
@@ -41,13 +54,15 @@ export interface QuizAttempt {
   isPassed: boolean;
   startedAt: string;
   submittedAt?: string;
-  answers: Record<string, string>; // { questionId: selectedOptionId }
+  answers: string; // raw JSON string from backend: { questionId: selectedOptionId }
 }
 
+/** Request to submit answers (learn page inline panel) */
 export interface SubmitAttemptRequest {
-  answers: Record<string, string>;
+  answers: Record<number, string>; // { questionId: selectedOptionId }
 }
 
+/** Attempt count result */
 export interface AttemptCountResult {
   quizId: number;
   studentId: number;

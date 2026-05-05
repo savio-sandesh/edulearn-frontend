@@ -93,7 +93,9 @@
           <div class="list-layout">
             @for (course of allCourses() | slice:0:3; track course.courseId) {
               <div class="list-item glass">
-                <div class="list-img" [style.background-image]="'url(' + (course.thumbnailUrl || 'assets/default-course.jpg') + ')'"></div>
+                <div class="list-img">
+                  <img #imgAdmin1 [src]="course.thumbnailUrl || '/assets/default-course.jpg'" (error)="imgAdmin1.src='/assets/default-course.jpg'" class="course-img" alt="Thumbnail">
+                </div>
                 <div class="list-content">
                   <h4>{{ course.title }}</h4>
                   <div class="meta-row">
@@ -137,7 +139,7 @@
                 <tr [class.inactive-row]="!u.isActive">
                   <td>
                     <div class="user-cell">
-                      <img [src]="u.avatarUrl || 'assets/default-course.jpg'" class="user-avatar" alt="Avatar" [class.grayscale]="!u.isActive">
+                      <img #imgAvatar [src]="u.avatarUrl || '/assets/default-course.jpg'" (error)="imgAvatar.src='/assets/default-course.jpg'" class="user-avatar" alt="Avatar" [class.grayscale]="!u.isActive">
                       <div class="user-details">
                         <span class="user-name">{{ u.fullName }} @if (!u.isActive) { <span class="badge badge-outline">BLOCKED</span> }</span>
                         <span class="user-email">{{ u.email }}</span>
@@ -169,20 +171,20 @@
       @if (activeTab() === 'approvals') {
         <div class="header-area">
           <h1>Course Approvals</h1>
-          <p>{{ pendingCount() }} courses pending review</p>
+          <p>{{ pendingCount() }} pending publish, {{ pendingDeleteCount() }} pending delete</p>
         </div>
 
         <div class="tabs-row">
-          <button [class.active]="approvalTab() === 'All'" (click)="approvalTab.set('All')">All ({{ pendingCount() + totalCourses() }})</button>
-          <button [class.active]="approvalTab() === 'Pending'" (click)="approvalTab.set('Pending')">Pending ({{ pendingCount() }})</button>
-          <button [class.active]="approvalTab() === 'Published'" (click)="approvalTab.set('Published')">Published ({{ totalCourses() }})</button>
-          <button [class.active]="approvalTab() === 'Rejected'" (click)="approvalTab.set('Rejected')">Rejected (0)</button>
+          <button [class.active]="approvalTab() === 'Pending Approval'" (click)="approvalTab.set('Pending Approval')">Pending Publish ({{ pendingCount() }})</button>
+          <button [class.active]="approvalTab() === 'Pending Delete'" (click)="approvalTab.set('Pending Delete')">Pending Delete ({{ pendingDeleteCount() }})</button>
         </div>
 
         <div class="list-layout mt-3">
           @for (course of filteredCourses(); track course.courseId) {
             <div class="list-item glass">
-              <div class="list-img" [style.background-image]="'url(' + (course.thumbnailUrl || 'assets/default-course.jpg') + ')'"></div>
+              <div class="list-img">
+                <img #imgAdmin2 [src]="course.thumbnailUrl || '/assets/default-course.jpg'" (error)="imgAdmin2.src='/assets/default-course.jpg'" class="course-img" alt="Thumbnail">
+              </div>
               <div class="list-content">
                 <h4>{{ course.title }}</h4>
                 <div class="meta-row desc-text">
@@ -195,11 +197,12 @@
                 </div>
               </div>
               <div class="list-actions">
-                @if (approvalTab() === 'Pending' || approvalTab() === 'All') {
-                  <button class="btn-success btn-sm" (click)="approveCourse(course)">Approve</button>
-                  <button class="btn-danger btn-sm" (click)="rejectCourse(course)">Reject</button>
-                } @else {
-                  <span class="badge published">PUBLISHED</span>
+                @if (approvalTab() === 'Pending Approval') {
+                  <button class="btn-success btn-sm" (click)="approveCourse(course)">Approve Publish</button>
+                  <button class="btn-danger btn-sm" (click)="rejectCourse(course)">Reject Publish</button>
+                } @else if (approvalTab() === 'Pending Delete') {
+                  <button class="btn-danger btn-sm" (click)="approveDelete(course)">Approve Delete</button>
+                  <button class="btn-success btn-sm" (click)="rejectDelete(course)">Reject Delete</button>
                 }
               </div>
             </div>

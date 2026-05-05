@@ -78,14 +78,13 @@ export class CourseService {
 
   /** Get all reviews for a course. */
   getReviews(courseId: number): Observable<Review[]> {
-    // Backend currently does not have a GET endpoint for reviews.
-    // Returning an empty array to prevent 404 browser console errors.
-    return of([] as Review[]);
+    return this.http.get<Review[]>(`${this.base}/${courseId}/reviews`);
   }
 
   /** Submit a review for a course. */
   addReview(courseId: number, dto: ReviewCreateRequest): Observable<Review> {
-    return this.http.post<Review>(`${this.base}/${courseId}/reviews`, dto);
+    const payload = { ...dto, courseId };
+    return this.http.post<Review>(`${environment.apis.course}/api/reviews`, payload);
   }
 
   /** Delete a review. */
@@ -105,6 +104,11 @@ export class CourseService {
     return this.http.get<Course[]>(`${this.base}/pending`);
   }
 
+  /** Get all courses pending deletion. (Admin only) */
+  getPendingDelete(): Observable<Course[]> {
+    return this.http.get<Course[]>(`${this.base}/pending-delete`);
+  }
+
   /** Approve a course for publishing. (Admin only) */
   approve(courseId: number): Observable<{ message: string }> {
     return this.http.put<{ message: string }>(`${this.base}/approve/${courseId}`, {});
@@ -113,5 +117,10 @@ export class CourseService {
   /** Reject a course from publishing. (Admin only) */
   reject(courseId: number): Observable<{ message: string }> {
     return this.http.put<{ message: string }>(`${this.base}/reject/${courseId}`, {});
+  }
+
+  /** Reject a course deletion request. (Admin only) */
+  rejectDelete(courseId: number): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.base}/reject-delete/${courseId}`, {});
   }
 }

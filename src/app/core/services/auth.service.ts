@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, throwError, of } from 'rxjs';
+import { Observable, tap, catchError, throwError, of, switchMap, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   User,
@@ -47,11 +47,19 @@ export class AuthService {
     );
   }
 
-  /** Login and store JWT tokens + user profile in localStorage. */
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.base}/login`, request).pipe(
       tap((res) => this.storeTokens(res)),
-      tap(() => this.fetchAndStoreProfile())
+      switchMap((res) => 
+        this.http.get<User>(`${this.base}/profile`).pipe(
+          tap((user) => {
+            this._currentUser.set(user);
+            localStorage.setItem(USER_KEY, JSON.stringify(user));
+          }),
+          map(() => res),
+          catchError(() => of(res))
+        )
+      )
     );
   }
 

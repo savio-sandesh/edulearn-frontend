@@ -63,7 +63,9 @@
         } @else {
           @for (course of courses() | slice:0:4; track course.courseId) {
             <div class="course-list-item glass">
-              <div class="c-thumb" [style.background-image]="'url(' + (course.thumbnailUrl || 'assets/default-course.jpg') + ')'"></div>
+              <div class="c-thumb">
+                <img #imgInst1 [src]="course.thumbnailUrl || '/assets/default-course.jpg'" (error)="imgInst1.src='/assets/default-course.jpg'" class="course-img" alt="Thumbnail">
+              </div>
               <div class="c-info">
                 <h3>{{ course.title }}</h3>
                 <div class="c-meta">
@@ -73,12 +75,19 @@
                 </div>
               </div>
               <div class="c-status">
-                <span class="status-badge" [class.success]="course.isPublished">{{ course.isPublished ? (course.isApproved ? 'PUBLISHED' : 'PENDING') : 'DRAFT' }}</span>
+                @if (course.isDeleteRequested) {
+                  <span class="status-badge text-danger">PENDING DELETE</span>
+                } @else {
+                  <span class="status-badge" [class.success]="course.isPublished">{{ course.isPublished ? (course.isApproved ? 'PUBLISHED' : 'PENDING') : 'DRAFT' }}</span>
+                }
               </div>
-              @if (!course.isPublished) {
+              @if (!course.isPublished && !course.isDeleteRequested) {
                 <button class="btn-primary btn-sm" (click)="publishCourse(course)">Publish</button>
               }
               <button class="btn-icon" title="Edit details" (click)="editCourse(course)">✏️</button>
+              @if (!course.isDeleteRequested) {
+                <button class="btn-icon text-danger" title="Delete course" (click)="deleteCourse(course)">🗑️</button>
+              }
             </div>
           } @empty {
             <div class="empty-state glass">
@@ -100,7 +109,9 @@
       <div class="courses-list full">
         @for (course of courses(); track course.courseId) {
           <div class="course-list-item glass">
-            <div class="c-thumb" [style.background-image]="'url(' + (course.thumbnailUrl || 'assets/default-course.jpg') + ')'"></div>
+            <div class="c-thumb">
+              <img #imgInst2 [src]="course.thumbnailUrl || '/assets/default-course.jpg'" (error)="imgInst2.src='/assets/default-course.jpg'" class="course-img" alt="Thumbnail">
+            </div>
             <div class="c-info">
               <h3>{{ course.title }}</h3>
               <div class="c-meta">
@@ -110,11 +121,16 @@
               </div>
             </div>
             <div class="c-actions">
-              @if (!course.isPublished) {
-                <button class="btn-primary btn-sm" style="margin-right: 8px;" (click)="publishCourse(course)">Publish</button>
+              @if (course.isDeleteRequested) {
+                <span class="status-badge text-danger" style="margin-right: 8px; padding: 6px 10px;">PENDING DELETE</span>
+              } @else {
+                @if (!course.isPublished) {
+                  <button class="btn-primary btn-sm" style="margin-right: 8px;" (click)="publishCourse(course)">Publish</button>
+                }
+                <button class="btn-ghost btn-sm" (click)="manageLessons(course)">Lessons</button>
+                <button class="btn-ghost btn-sm" (click)="editCourse(course)">Edit</button>
+                <button class="btn-ghost btn-sm text-danger" (click)="deleteCourse(course)">Delete</button>
               }
-              <button class="btn-ghost btn-sm" (click)="manageLessons(course)">Lessons</button>
-              <button class="btn-ghost btn-sm" (click)="editCourse(course)">Edit</button>
             </div>
           </div>
         } @empty {
@@ -365,6 +381,7 @@
           <div class="wizard-container glass m-0">
             <h3>Add New Lesson</h3>
             <form [formGroup]="lessonForm" (ngSubmit)="submitLesson()">
+
               <div class="form-group">
                 <label>Lesson Title *</label>
                 <input type="text" formControlName="title" class="form-control" placeholder="e.g. Introduction to Variables">
@@ -378,10 +395,10 @@
               <div class="form-row">
                 <div class="form-group half">
                   <label>Content Type</label>
-                  <select formControlName="contentType" class="form-control">
-                    <option value="Video">Video</option>
-                    <option value="Article">Article</option>
-                    <option value="Quiz">Quiz</option>
+                  <select formControlName="contentType" class="form-control" (change)="onContentTypeChange()">
+                    <option value="Video">🎬 Video</option>
+                    <option value="Article">📄 Article</option>
+                    <option value="Quiz">🧩 Quiz</option>
                   </select>
                 </div>
                 <div class="form-group half">
@@ -390,12 +407,88 @@
                 </div>
               </div>
 
-              <div class="form-group">
-                <label>Lesson Video (.mp4) *</label>
-                <input type="file" accept="video/mp4" (change)="onVideoSelected($event)" class="form-control">
-              </div>
+              <!-- ── VIDEO: file upload ─────────────────── -->
+              @if (lessonForm.get('contentType')?.value === 'Video') {
+                <div class="content-type-panel">
+                  <div class="content-type-label">
+                    <span class="ct-icon">🎬</span>
+                    <div>
+                      <strong>Upload Video</strong>
+                      <p>Accepted format: .mp4 — uploaded securely to Azure Blob Storage</p>
+                    </div>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label>Lesson Video (.mp4) *</label>
+                    <input type="file" accept="video/mp4" (change)="onVideoSelected($event)" class="form-control">
+                    @if (videoFile) {
+                      <small class="text-success d-block mt-1">✓ Selected: {{ videoFile.name }}</small>
+                    }
+                  </div>
+                </div>
+              }
 
-              <div class="form-group checkbox-group">
+              <!-- ── ARTICLE: rich text editor ──────────── -->
+              @if (lessonForm.get('contentType')?.value === 'Article') {
+                <div class="content-type-panel">
+                  <div class="content-type-label">
+                    <span class="ct-icon">📄</span>
+                    <div>
+                      <strong>Write Article Content</strong>
+                      <p>Supports plain text. Students will read this directly in the learn page.</p>
+                    </div>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label>Article Content *</label>
+                    <textarea
+                      formControlName="articleContent"
+                      rows="12"
+                      class="form-control article-editor"
+                      placeholder="Write your article here. You can use plain text, code blocks, bullet points, etc."
+                    ></textarea>
+                    <small class="text-muted d-block mt-1">{{ articleCharCount() }} characters</small>
+                  </div>
+                </div>
+              }
+
+              <!-- ── QUIZ: link existing quiz ───────────── -->
+              @if (lessonForm.get('contentType')?.value === 'Quiz') {
+                <div class="content-type-panel">
+                  <div class="content-type-label">
+                    <span class="ct-icon">🧩</span>
+                    <div>
+                      <strong>Link a Quiz</strong>
+                      <p>The quiz will appear for students right after this lesson card.</p>
+                    </div>
+                  </div>
+                  <div class="form-group mt-2">
+                    @if (courseQuizzes().length === 0) {
+                      <div class="empty-state glass py-3">
+                        <p>No quizzes created yet for this course.</p>
+                        <button type="button" class="btn-ghost btn-sm mt-2" (click)="goToQuizBuilder()">
+                          Go to Quiz Builder →
+                        </button>
+                      </div>
+                    } @else {
+                      <label>Select Quiz to Attach *</label>
+                      <select formControlName="linkedQuizId" class="form-control">
+                        <option [value]="null">— Choose a quiz —</option>
+                        @for (quiz of courseQuizzes(); track quiz.quizId) {
+                          <option [value]="quiz.quizId">
+                            {{ quiz.title }} ({{ parsedQuizQuestionCount(quiz) }} Qs · {{ quiz.passingScore }}% to pass)
+                          </option>
+                        }
+                      </select>
+                      <small class="text-muted d-block mt-1">
+                        Don't see your quiz? Go to the
+                        <button type="button" class="link-btn" (click)="goToQuizBuilder()">Quiz Builder</button>
+                        to create one first.
+                      </small>
+                    }
+                  </div>
+                </div>
+              }
+
+              <div class="form-group checkbox-group mt-2">
                 <label class="checkbox-label">
                   <input type="checkbox" formControlName="isPreview">
                   <span class="checkmark"></span>
@@ -406,6 +499,169 @@
               <div class="wizard-actions right">
                 <button type="submit" class="btn-primary" [disabled]="submittingLesson()">
                   {{ submittingLesson() ? 'Adding...' : '+ Add Lesson' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    }
+
+
+    <!-- QUIZ BUILDER TAB -->
+    @if (activeTab() === 'quiz') {
+      <div class="header-area flex-between">
+        <div>
+          <button class="btn-ghost btn-sm mb-2" (click)="setTab('courses')">← Back to Courses</button>
+          <h1>Quiz Builder</h1>
+          <p>Quizzes for: <strong>{{ selectedCourse()?.title }}</strong></p>
+        </div>
+      </div>
+
+      <div class="lesson-builder-grid">
+
+        <!-- Left: Existing Quizzes -->
+        <div class="lessons-list-col">
+          <div class="section-header mt-0">
+            <h2>Course Quizzes</h2>
+          </div>
+          <div class="lessons-list">
+            @for (quiz of courseQuizzes(); track quiz.quizId) {
+              <div class="lesson-item glass">
+                <div class="lesson-info">
+                  <h4>🧩 {{ quiz.title }}</h4>
+                  <div class="lesson-meta">
+                    <span class="badge">{{ parsedQuizQuestionCount(quiz) }} Qs</span>
+                    <span>Pass: {{ quiz.passingScore }}%</span>
+                    <span>⏱ {{ quiz.timeLimitMinutes }} min</span>
+                    <span>Max {{ quiz.maxAttempts }} attempts</span>
+                    @if (quiz.lessonId) { <span class="badge">Lesson {{ quiz.lessonId }}</span> }
+                    @if (quiz.isPublished) {
+                      <span class="badge success">Published</span>
+                    } @else {
+                      <span class="badge">Draft</span>
+                    }
+                  </div>
+                </div>
+                <div class="lesson-actions">
+                  @if (!quiz.isPublished) {
+                    <button class="btn-primary btn-sm" [disabled]="publishingQuiz() === quiz.quizId" (click)="publishQuiz(quiz)">
+                      {{ publishingQuiz() === quiz.quizId ? '...' : 'Publish' }}
+                    </button>
+                  }
+                  <button class="btn-icon text-danger" title="Delete" (click)="deleteQuiz(quiz)">🗑️</button>
+                </div>
+              </div>
+            } @empty {
+              <div class="empty-state glass">
+                <p>No quizzes yet. Create one using the form →</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Right: Create Quiz Form -->
+        <div class="add-lesson-col">
+          <div class="wizard-container glass m-0">
+            <h3>Create New Quiz</h3>
+            <form [formGroup]="quizForm" (ngSubmit)="submitQuiz()">
+
+              <div class="form-group">
+                <label>Quiz Title *</label>
+                <input type="text" formControlName="title" class="form-control" placeholder="e.g. Chapter 1 Quiz">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group half">
+                  <label>Time Limit (mins) *</label>
+                  <input type="number" formControlName="timeLimitMinutes" min="1" class="form-control">
+                </div>
+                <div class="form-group half">
+                  <label>Passing Score (%) *</label>
+                  <input type="number" formControlName="passingScore" min="1" max="100" class="form-control">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Max Attempts *</label>
+                <input type="number" formControlName="maxAttempts" min="1" class="form-control">
+              </div>
+
+              <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="attachToLesson">
+                  <span class="checkmark"></span>
+                  Attach to a specific lesson
+                </label>
+              </div>
+
+              @if (quizForm.get('attachToLesson')?.value) {
+                <div class="form-group">
+                  <label>Select Lesson</label>
+                  <select formControlName="lessonId" class="form-control">
+                    <option [value]="null">— None —</option>
+                    @for (lesson of courseLessons(); track lesson.lessonId) {
+                      <option [value]="lesson.lessonId">{{ lesson.title }}</option>
+                    }
+                  </select>
+                </div>
+              }
+
+              <!-- Questions Builder -->
+              <div class="section-header mt-3">
+                <h4>Questions ({{ quizQuestions().length }})</h4>
+                <button type="button" class="btn-ghost btn-sm" (click)="addQuestion()">+ Add Question</button>
+              </div>
+
+              @for (q of quizQuestions(); track q.id) {
+                <div class="quiz-question-card glass">
+                  <div class="q-header">
+                    <span class="q-num">Q{{ q.id }}</span>
+                    <button type="button" class="btn-icon text-danger" (click)="removeQuestion(q.id)">✕</button>
+                  </div>
+                  <textarea
+                    class="form-control mb-2"
+                    rows="2"
+                    placeholder="Enter question text..."
+                    [value]="q.text"
+                    (input)="updateQuestionText(q.id, $any($event.target).value)"
+                  ></textarea>
+                  <div class="q-options">
+                    @for (opt of q.options; track opt.id) {
+                      <div class="q-option" [class.correct]="q.correctOptionId === opt.id">
+                        <input
+                          type="radio"
+                          [name]="'correct_' + q.id"
+                          [value]="opt.id"
+                          [checked]="q.correctOptionId === opt.id"
+                          (change)="setCorrectAnswer(q.id, opt.id)"
+                          title="Mark as correct answer"
+                        >
+                        <span class="opt-label">{{ opt.id }}</span>
+                        <input
+                          type="text"
+                          class="form-control opt-input"
+                          [value]="opt.text"
+                          [placeholder]="'Option ' + opt.id"
+                          (input)="updateOptionText(q.id, opt.id, $any($event.target).value)"
+                        >
+                      </div>
+                    }
+                  </div>
+                  <small class="text-muted">Select the radio button beside the correct answer.</small>
+                </div>
+              }
+
+              @if (quizQuestions().length === 0) {
+                <div class="empty-state glass py-3">
+                  <p>Click "+ Add Question" to start building the quiz.</p>
+                </div>
+              }
+
+              <div class="wizard-actions right mt-3">
+                <button type="submit" class="btn-primary" [disabled]="submittingQuiz()">
+                  {{ submittingQuiz() ? 'Saving...' : '💾 Save Quiz (Draft)' }}
                 </button>
               </div>
             </form>

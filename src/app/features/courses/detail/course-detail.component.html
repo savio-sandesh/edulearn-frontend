@@ -53,7 +53,7 @@
       <div class="stats-row">
         <div class="stat-pill">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 0 0 0-1.5h-3.25V5Z" clip-rule="evenodd"/></svg>
-          {{ formatDuration(course()!.totalDuration) }}
+          {{ formatDuration(totalDuration()) }}
         </div>
         <div class="stat-pill">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M10.75 16.82A7.462 7.462 0 0 1 10 17c-.34 0-.673-.028-1-.082v-2.636a5.986 5.986 0 0 0 2 0v2.636ZM5.148 14.706a7.5 7.5 0 0 1-1.98-2.204l2.24-1.294a5.986 5.986 0 0 0 1.042 1.393l-1.302 2.105ZM4.083 9.049a7.466 7.466 0 0 1 .085-2.092l2.567.736a5.987 5.987 0 0 0-.085 1.356v.001l-2.567-.001ZM5.045 4.971A7.5 7.5 0 0 1 7.01 3.27L8.272 5.39A5.986 5.986 0 0 0 6.36 6.696L5.045 4.97Z"/></svg>
@@ -78,6 +78,33 @@
       <!-- Reviews -->
       <section class="detail-section">
         <h2>Student Reviews</h2>
+
+        @if (isEnrolled()) {
+          <div class="leave-review-box mb-4">
+            <h3>Leave a Review</h3>
+            <div class="review-stars-input">
+              @for (star of starArray; track star) {
+                <button 
+                  class="star-btn" 
+                  [class.active]="star <= reviewRating()" 
+                  (click)="setRating(star)"
+                  type="button"
+                >★</button>
+              }
+            </div>
+            <textarea 
+              class="form-control" 
+              rows="3" 
+              placeholder="Tell us what you think about this course..."
+              [value]="reviewComment()"
+              (input)="updateComment($event)"
+            ></textarea>
+            <button class="btn-primary mt-2" [disabled]="submittingReview()" (click)="submitReview()">
+              {{ submittingReview() ? 'Submitting...' : 'Submit Review' }}
+            </button>
+          </div>
+        }
+
         @if (reviews().length === 0) {
           <p class="no-reviews">No reviews yet. Be the first to leave one!</p>
         } @else {
@@ -154,7 +181,7 @@
           </li>
           <li>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"/></svg>
-            {{ formatDuration(course()!.totalDuration) }} of content
+            {{ formatDuration(totalDuration()) }} of content
           </li>
           <li>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"/></svg>

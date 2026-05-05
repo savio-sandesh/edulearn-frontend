@@ -149,9 +149,18 @@
   .c-thumb {
     width: 120px;
     height: 70px;
-    background-size: cover;
-    background-position: center;
+    background-color: #1a1a2e;
     border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+
+    .course-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
   }
 
   .c-info {
@@ -431,5 +440,81 @@
 
 .m-0 { margin: 0 !important; }
 .mt-0 { margin-top: 0 !important; }
+.mt-2 { margin-top: 10px !important; }
+.mt-3 { margin-top: 16px !important; }
 .mb-2 { margin-bottom: 8px !important; }
+.py-3 { padding-top: 16px !important; padding-bottom: 16px !important; }
+.d-block { display: block !important; }
+.text-success { color: #10b981 !important; }
 .flex-between { display: flex; justify-content: space-between; align-items: flex-start; }
+
+/* ── Content Type Panel (Video / Article / Quiz) ─────── */
+.content-type-panel {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  animation: fadeInDown 0.2s ease;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.content-type-label {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 4px;
+  .ct-icon { font-size: 1.4rem; flex-shrink: 0; line-height: 1; }
+  strong { display: block; font-size: 0.9rem; color: #e2e8f0; margin-bottom: 2px; }
+  p { font-size: 0.78rem; color: #64748b; margin: 0; }
+}
+
+.article-editor {
+  font-family: 'Fira Code', 'Courier New', monospace !important;
+  font-size: 0.85rem !important;
+  line-height: 1.7 !important;
+  min-height: 240px;
+  resize: vertical;
+}
+
+.link-btn {
+  background: none; border: none; padding: 0;
+  color: var(--primary); font-size: inherit;
+  cursor: pointer; text-decoration: underline;
+  &:hover { opacity: 0.8; }
+}
+
+
+/* ── Quiz Question Card ─────────────────────────────── */
+.quiz-question-card {
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+
+  .q-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .q-num {
+    font-weight: 700; font-size: 0.85rem; color: var(--primary);
+    background: rgba(124,58,237,0.12); padding: 2px 8px; border-radius: 999px;
+  }
+  .q-options {
+    display: flex; flex-direction: column; gap: 8px; margin-top: 8px;
+  }
+  .q-option {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+    padding: 6px 10px; transition: border-color 0.2s;
+
+    &.correct { border-color: rgba(16,185,129,0.5); background: rgba(16,185,129,0.05); }
+
+    input[type="radio"] { accent-color: #10b981; flex-shrink: 0; }
+  }
+  .opt-label {
+    font-weight: 700; font-size: 0.8rem; color: var(--primary); min-width: 16px;
+  }
+  .opt-input { flex: 1; padding: 6px 10px; font-size: 0.85rem; }
+}
+

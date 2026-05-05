@@ -37,7 +37,8 @@
         <div class="course-grid">
           @for (course of activeCourses(); track course.enrollmentId) {
             <div class="course-card active-card">
-              <div class="card-img" [style.background-image]="course.courseThumbnailUrl ? 'url(\'' + course.courseThumbnailUrl + '\'), url(\'/assets/default-course.jpg\')' : 'url(\'/assets/default-course.jpg\')'">
+              <div class="card-img">
+                <img #img1 [src]="course.courseThumbnailUrl || '/assets/default-course.jpg'" (error)="img1.src='/assets/default-course.jpg'" class="course-img" alt="Course Thumbnail">
                 <div class="img-overlay"></div>
               </div>
               <div class="card-content">
@@ -80,7 +81,8 @@
         <div class="course-grid">
           @for (course of completedCourses(); track course.enrollmentId) {
             <div class="course-card completed-card">
-              <div class="card-img" [style.background-image]="course.courseThumbnailUrl ? 'url(\'' + course.courseThumbnailUrl + '\'), url(\'/assets/default-course.jpg\')' : 'url(\'/assets/default-course.jpg\')'">
+              <div class="card-img">
+                <img #img2 [src]="course.courseThumbnailUrl || '/assets/default-course.jpg'" (error)="img2.src='/assets/default-course.jpg'" class="course-img" alt="Course Thumbnail">
                 <div class="completed-badge">✓ Completed</div>
               </div>
               <div class="card-content">

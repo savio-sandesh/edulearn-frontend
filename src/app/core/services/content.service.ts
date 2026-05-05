@@ -45,4 +45,9 @@ export class ContentService {
   reorderLessons(courseId: number, dto: ReorderLessonsRequest): Observable<{ message: string }> {
     return this.http.put<{ message: string }>(`${this.base}/reorder/${courseId}`, dto);
   }
+
+  /** Get the sum of all lesson durations for a course (in minutes). */
+  getTotalDuration(courseId: number): Observable<{ courseId: number; totalMinutes: number }> {
+    return this.http.get<{ courseId: number; totalMinutes: number }>(`${this.base}/totalDuration/${courseId}`);
+  }
 }

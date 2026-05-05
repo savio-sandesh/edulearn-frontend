@@ -47,11 +47,16 @@
             <span class="lesson-title">{{ lesson.title }}</span>
             <span class="lesson-duration">{{ formatDuration(lesson.durationMinutes) }}</span>
           </span>
-          @if (lesson.contentUrl) {
+          @if (lesson.contentType === 'ARTICLE') {
+            <span style="font-size:0.85rem">📄</span>
+          } @else if (lesson.contentType === 'QUIZ_LINK') {
+            <span style="font-size:0.85rem">🧩</span>
+          } @else if (lesson.contentUrl) {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="14" height="14" class="video-icon">
               <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z"/>
             </svg>
           }
+
         </button>
       }
 
@@ -83,36 +88,54 @@
       <span class="topbar-progress">{{ progressPercent() }}% complete</span>
     </div>
 
-    <!-- Video Player -->
-    <div class="video-container">
-      @if (safeVideoUrl()) {
-        <iframe
-          [src]="safeVideoUrl()!"
-          allowfullscreen
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          title="Lesson video"
-        ></iframe>
-      } @else if (current()) {
-        <div class="video-placeholder">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="56" height="56">
-            <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd"/>
-          </svg>
-          <p>No video for this lesson</p>
-        </div>
-      } @else {
-        <div class="video-placeholder">
-          <p>Select a lesson to start learning</p>
-        </div>
-      }
-    </div>
+    <!-- Content Player: switches by contentType -->
+    @if (current()?.contentType === 'ARTICLE') {
+      <!-- Article Reader -->
+      <div class="article-container">
+        <div class="article-badge">📄 Article</div>
+        <div class="article-body">{{ articleContent() }}</div>
+      </div>
+    } @else if (current()?.contentType === 'QUIZ_LINK') {
+      <!-- Quiz placeholder — the quiz panel below handles the actual quiz -->
+      <div class="video-placeholder quiz-placeholder">
+        <span style="font-size: 3rem">🧩</span>
+        <p>This lesson contains a quiz. Scroll down to take it.</p>
+      </div>
+    } @else {
+      <!-- Video Player (default) -->
+      <div class="video-container">
+        @if (safeVideoUrl()) {
+          <iframe
+            [src]="safeVideoUrl()!"
+            allowfullscreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            title="Lesson video"
+          ></iframe>
+        } @else if (current()) {
+          <div class="video-placeholder">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="56" height="56">
+              <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd"/>
+            </svg>
+            <p>No video for this lesson</p>
+          </div>
+        } @else {
+          <div class="video-placeholder">
+            <p>Select a lesson to start learning</p>
+          </div>
+        }
+      </div>
+    }
 
     <!-- Lesson Content -->
     @if (current()) {
       <div class="lesson-content">
         <h1>{{ current()!.title }}</h1>
-        @if (current()!.description) {
+        @if (current()!.description && current()!.contentType !== 'ARTICLE' && current()!.contentType !== 'QUIZ_LINK') {
           <div class="lesson-text">{{ current()!.description }}</div>
         }
+
+
+
 
         <!-- Navigation + Complete -->
         <div class="lesson-actions">
@@ -133,8 +156,76 @@
             Next →
           </button>
         </div>
+
+        <!-- ── Quiz Panel ─────────────────────────────── -->
+        @if (loadingQuiz()) {
+          <div class="quiz-panel quiz-loading">
+            <div class="learn-spinner"></div><p>Checking for quiz…</p>
+          </div>
+        }
+
+        @if (!loadingQuiz() && currentQuiz()) {
+          <div class="quiz-panel">
+            <div class="quiz-header">
+              <span class="quiz-icon">🧩</span>
+              <div>
+                <h2>{{ currentQuiz()!.title }}</h2>
+                <p>{{ parsedQuestions().length }} questions · {{ currentQuiz()!.timeLimitMinutes }} min · Pass: {{ currentQuiz()!.passingScore }}%</p>
+              </div>
+            </div>
+
+            <!-- Not started yet -->
+            @if (!activeAttempt() && !quizResult()) {
+              <button class="btn-start-quiz" (click)="startQuizAttempt()" [disabled]="submittingAttempt()">
+                {{ submittingAttempt() ? 'Starting...' : '▶ Start Quiz' }}
+              </button>
+            }
+
+            <!-- Active attempt: answer questions -->
+            @if (activeAttempt() && !quizResult()) {
+              <div class="quiz-questions">
+                @for (q of parsedQuestions(); track q.id; let i = $index) {
+                  <div class="quiz-q-card">
+                    <p class="q-text"><strong>{{ i + 1 }}.</strong> {{ q.text }}</p>
+                    <div class="q-options">
+                      @for (opt of q.options; track opt.id) {
+                        <button
+                          class="q-opt-btn"
+                          [class.selected]="selectedAnswers()[q.id] === opt.id"
+                          (click)="selectAnswer(q.id, opt.id)"
+                        >
+                          <span class="opt-label">{{ opt.id }}</span>{{ opt.text }}
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+                <div class="quiz-submit-row">
+                  <button class="btn-complete" (click)="submitQuizAttempt()" [disabled]="submittingAttempt()">
+                    {{ submittingAttempt() ? 'Grading...' : 'Submit Quiz →' }}
+                  </button>
+                </div>
+              </div>
+            }
+
+            <!-- Result -->
+            @if (quizResult()) {
+              <div class="quiz-result" [class.passed]="quizResult()!.isPassed" [class.failed]="!quizResult()!.isPassed">
+                <div class="result-icon">{{ quizResult()!.isPassed ? '🏆' : '📚' }}</div>
+                <h3>{{ quizResult()!.isPassed ? 'Congratulations! You Passed!' : 'Keep Practicing!' }}</h3>
+                <p class="result-score">Score: <strong>{{ quizResult()!.score }}%</strong></p>
+                <p class="result-needed">Required: {{ currentQuiz()!.passingScore }}%</p>
+                @if (!quizResult()!.isPassed) {
+                  <button class="btn-start-quiz mt-2" (click)="retryQuiz()">↺ Try Again</button>
+                }
+              </div>
+            }
+          </div>
+        }
+
       </div>
     }
   </main>
 </div>
 }
+

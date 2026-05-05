@@ -4,8 +4,9 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ContentService } from '../../core/services/content.service';
 import { EnrollmentService } from '../../core/services/enrollment.service';
 import { CourseService } from '../../core/services/course.service';
+import { AssessmentService } from '../../core/services/assessment.service';
 import { ToastService } from '../../core/services/toast.service';
-import { Lesson, Course, LessonProgress } from '../../core/models';
+import { Lesson, Course, LessonProgress, Quiz, QuizAttempt, QuizQuestion } from '../../core/models';
 
 @Component({
   selector: 'app-learn',
@@ -18,10 +19,11 @@ export class LearnComponent implements OnInit {
   private readonly route      = inject(ActivatedRoute);
   private readonly router     = inject(Router);
   private readonly sanitizer  = inject(DomSanitizer);
-  private readonly contentSvc = inject(ContentService);
-  private readonly enrollSvc  = inject(EnrollmentService);
-  private readonly courseSvc  = inject(CourseService);
-  private readonly toast      = inject(ToastService);
+  private readonly contentSvc    = inject(ContentService);
+  private readonly enrollSvc     = inject(EnrollmentService);
+  private readonly courseSvc     = inject(CourseService);
+  private readonly assessmentSvc = inject(AssessmentService);
+  private readonly toast         = inject(ToastService);
 
   courseId  = signal(0);
   course    = signal<Course | null>(null);
@@ -32,10 +34,36 @@ export class LearnComponent implements OnInit {
   marking   = signal(false);
   sidebarOpen = signal(true);
 
+  // Quiz state
+  currentQuiz       = signal<Quiz | null>(null);
+  loadingQuiz       = signal(false);
+  activeAttempt     = signal<QuizAttempt | null>(null);
+  quizResult        = signal<QuizAttempt | null>(null);
+  selectedAnswers   = signal<Record<number, string>>({});
+  submittingAttempt = signal(false);
+  parsedQuestions   = signal<QuizQuestion[]>([]);
+
   safeVideoUrl = computed<SafeResourceUrl | null>(() => {
-    const url = this.current()?.contentUrl;
-    if (!url) return null;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(this.toEmbedUrl(url));
+    const lesson = this.current();
+    if (!lesson?.contentUrl) return null;
+    // Don't embed article or quiz placeholder URLs as video
+    if (lesson.contentType === 'ARTICLE' || lesson.contentType === 'QUIZ_LINK') return null;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.toEmbedUrl(lesson.contentUrl));
+  });
+
+  /** Article text — stored in lesson.description for ARTICLE-type lessons. */
+  articleContent = computed<string>(() => {
+    const lesson = this.current();
+    if (lesson?.contentType !== 'ARTICLE') return '';
+    return lesson.description ?? '';
+  });
+
+  /** Quiz ID extracted from lesson.description for QUIZ_LINK-type lessons. */
+  linkedQuizId = computed<number | null>(() => {
+    const lesson = this.current();
+    if (lesson?.contentType !== 'QUIZ_LINK') return null;
+    const id = parseInt(lesson.description ?? '', 10);
+    return isNaN(id) ? null : id;
   });
 
   completedIds = computed(() => new Set(this.progress().map(p => p.lessonId)));
@@ -85,7 +113,105 @@ export class LearnComponent implements OnInit {
 
   selectLesson(lesson: Lesson): void {
     this.current.set(lesson);
+    this.currentQuiz.set(null);
+    this.activeAttempt.set(null);
+    this.quizResult.set(null);
+    this.selectedAnswers.set({});
+    this.parsedQuestions.set([]);
     if (window.innerWidth < 768) this.sidebarOpen.set(false);
+
+    // For QUIZ_LINK lessons the quizId is stored in lesson.description
+    if (lesson.contentType === 'QUIZ_LINK') {
+      const quizId = parseInt(lesson.description ?? '', 10);
+      if (!isNaN(quizId)) this.loadQuizById(quizId);
+    } else {
+      // For VIDEO/ARTICLE lessons, check if a quiz is associated via lessonId
+      this.loadQuizForLesson(lesson.lessonId);
+    }
+  }
+
+  private loadQuizById(quizId: number): void {
+    this.loadingQuiz.set(true);
+    this.assessmentSvc.getQuizById(quizId).subscribe({
+      next: (quiz) => {
+        if (quiz?.isPublished) {
+          this.currentQuiz.set(quiz);
+          this.parsedQuestions.set(this.parseQuestions(quiz));
+        }
+        this.loadingQuiz.set(false);
+      },
+      error: () => this.loadingQuiz.set(false)
+    });
+  }
+
+  private loadQuizForLesson(lessonId: number): void {
+    this.loadingQuiz.set(true);
+    this.assessmentSvc.getQuizByLesson(lessonId).subscribe({
+      next: (quiz) => {
+        if (quiz?.isPublished) {
+          this.currentQuiz.set(quiz);
+          this.parsedQuestions.set(this.parseQuestions(quiz));
+        }
+        this.loadingQuiz.set(false);
+      },
+      error: () => this.loadingQuiz.set(false)
+    });
+  }
+
+  parseQuestions(quiz: Quiz): QuizQuestion[] {
+    try {
+      const content: { id: number; text: string; options: { id: string; text: string }[] }[] =
+        JSON.parse(quiz.description || '[]');
+      return content.map(q => ({ ...q, correctOptionId: '' }));
+    } catch { return []; }
+  }
+
+  selectAnswer(questionId: number, optionId: string): void {
+    this.selectedAnswers.update(a => ({ ...a, [questionId]: optionId }));
+  }
+
+  startQuizAttempt(): void {
+    const quiz = this.currentQuiz();
+    if (!quiz) return;
+    this.submittingAttempt.set(true);
+    this.assessmentSvc.startAttempt(quiz.quizId).subscribe({
+      next: (attempt) => {
+        this.activeAttempt.set(attempt);
+        this.submittingAttempt.set(false);
+      },
+      error: (err) => {
+        this.toast.error(err.error?.message || 'Could not start quiz attempt.');
+        this.submittingAttempt.set(false);
+      }
+    });
+  }
+
+  submitQuizAttempt(): void {
+    const attempt = this.activeAttempt();
+    if (!attempt) return;
+    const answers = this.selectedAnswers();
+    this.submittingAttempt.set(true);
+    this.assessmentSvc.submitAttempt(attempt.attemptId, { answers }).subscribe({
+      next: (result) => {
+        this.quizResult.set(result);
+        this.activeAttempt.set(null);
+        this.submittingAttempt.set(false);
+        if (result.isPassed) {
+          this.toast.success(`🎉 You passed! Score: ${result.score}%`);
+        } else {
+          this.toast.error(`Score: ${result.score}% — Passing score is ${this.currentQuiz()?.passingScore}%.`);
+        }
+      },
+      error: (err) => {
+        this.toast.error(err.error?.message || 'Could not submit quiz.');
+        this.submittingAttempt.set(false);
+      }
+    });
+  }
+
+  retryQuiz(): void {
+    this.quizResult.set(null);
+    this.selectedAnswers.set({});
   }
 
   markComplete(): void {

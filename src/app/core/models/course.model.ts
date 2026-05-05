@@ -14,6 +14,7 @@ export interface Course {
   thumbnailUrl?: string;
   isPublished: boolean;
   isApproved: boolean;
+  isDeleteRequested: boolean;
   createdAt: string;
   updatedAt: string;
   totalDuration: number;

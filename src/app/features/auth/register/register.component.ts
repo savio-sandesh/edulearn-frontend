@@ -56,11 +56,20 @@ export class RegisterComponent {
         this.auth.login({ email: this.email.value!, password: this.password.value! }).subscribe({
           next: () => {
             this.toast.success('Account created! Welcome to EduLearn 🎉');
-            this.router.navigate(['/dashboard']);
+            let returnUrl = '/dashboard';
+            const role = this.auth.userRole();
+            if (role === 'INSTRUCTOR') returnUrl = '/instructor';
+            else if (role === 'ADMIN') returnUrl = '/admin';
+            
+            this.router.navigateByUrl(returnUrl).then(navigated => {
+               if(!navigated) this.loading.set(false);
+            });
           },
           error: () => {
             this.toast.success('Account created! Please sign in.');
-            this.router.navigate(['/login']);
+            this.router.navigate(['/login']).then(navigated => {
+               if(!navigated) this.loading.set(false);
+            });
           },
         });
       },
