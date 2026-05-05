@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { Enrollment, EnrollmentCheckResult, LessonProgress, Certificate } from '../models';
 import { AuthService } from './auth.service';
 import { of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class EnrollmentService {
@@ -69,8 +70,17 @@ export class EnrollmentService {
     return this.http.post<{ message: string }>(`${this.base}/complete/${courseId}`, {});
   }
 
+  /** Issue a certificate for a completed course. */
+  issueCertificate(enrollmentId: number): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.base}/issueCert/${enrollmentId}`, {});
+  }
+
   /** Get the certificate for a completed course. */
   getCertificate(courseId: number): Observable<Certificate> {
-    return this.http.get<Certificate>(`${this.base}/certificate/${courseId}`);
+    const studentId = this.authSvc.currentUser()?.userId;
+    if (!studentId) return of({} as Certificate);
+    return this.http.get<Certificate[]>(`${this.progressBase}/certificates?studentId=${studentId}&courseId=${courseId}`).pipe(
+      map(certs => certs && certs.length > 0 ? certs[0] : null as any)
+    );
   }
 }

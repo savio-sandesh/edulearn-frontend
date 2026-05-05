@@ -87,6 +87,10 @@
                     <a [routerLink]="['/certificates', course.courseId]" class="btn-cert">
                       View Certificate
                     </a>
+                  } @else {
+                    <button class="btn-cert" (click)="claimCertificate(course.enrollmentId)">
+                      Get Certificate
+                    </button>
                   }
                 </div>
               </div>

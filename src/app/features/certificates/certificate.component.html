@@ -29,17 +29,19 @@
           </div>
 
           <div class="cert-body">
-            <p class="presented-to">This is to certify that</p>
-            <h2 class="student-name">{{ certificate()!.studentName }}</h2>
-            <p class="completed-text">has successfully completed the course</p>
-            <h3 class="course-title">{{ certificate()!.courseTitle }}</h3>
+            <p class="presented-to">
+              This is to certify that <span class="student-name-inline">{{ certificate()!.studentName }}</span><br>
+              has successfully completed the course of study entitled<br>
+              <span class="course-title-inline">{{ certificate()!.courseTitle }}</span><br>
+              and is hereby awarded this Certificate of Completion.
+            </p>
           </div>
 
           <div class="cert-footer">
             <div class="footer-col">
+              <span class="value date-value">{{ certificate()!.issuedAt | date:'longDate' }}</span>
               <span class="line"></span>
               <span class="label">Date Issued</span>
-              <span class="value">{{ certificate()!.issuedAt | date:'longDate' }}</span>
             </div>
             
             <div class="seal-col">
@@ -49,7 +51,7 @@
                   <span>VERIFIED</span>
                 </div>
               </div>
-              <div class="cert-id">ID: {{ certificate()!.certificateId | number:'6.0-0' | slice:0:6 }}</div>
+              <div class="cert-id">ID: {{ certificate()!.certificateId }}</div>
             </div>
 
             <div class="footer-col">

@@ -72,4 +72,22 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
+
+  claimCertificate(enrollmentId: number) {
+    this.enrollSvc.issueCertificate(enrollmentId).subscribe({
+      next: () => {
+        // Optimistically update UI
+        const updated = this.enrollments().map(e => {
+          if (e.enrollmentId === enrollmentId) {
+            return { ...e, hasCertificate: true };
+          }
+          return e;
+        });
+        this.enrollments.set(updated);
+      },
+      error: (err) => {
+        console.error('Failed to issue certificate:', err);
+      }
+    });
+  }
 }
