@@ -43,7 +43,10 @@
           <span class="label"><span class="icon">⭐</span> Avg. Rating</span>
           <span class="value">{{ averageRating() | number:'1.1-1' }}</span>
         </div>
-
+        <div class="stat-card glass">
+          <span class="label"><span class="icon">💵</span> Total Revenue</span>
+          <span class="value">{{ totalRevenue() | currency:'USD':'symbol':'1.0-0' }}</span>
+        </div>
       </div>
 
       <!-- Recent Courses List -->
@@ -309,6 +312,7 @@
         <div class="stat-card glass"><span class="label">Total Students</span><span class="value">{{ totalStudents() | number }}</span></div>
         <div class="stat-card glass"><span class="label">Courses</span><span class="value">{{ courses().length }}</span></div>
         <div class="stat-card glass"><span class="label">Avg. Rating</span><span class="value">{{ averageRating() | number:'1.1-1' }}</span></div>
+        <div class="stat-card glass"><span class="label">Total Revenue</span><span class="value">{{ totalRevenue() | currency:'USD':'symbol':'1.0-0' }}</span></div>
       </div>
 
       <div class="chart-container glass">

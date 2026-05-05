@@ -6,14 +6,14 @@ import { AssessmentService, QuizCreatePayload } from '../../core/services/assess
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Course, CourseCreateRequest, Lesson, LessonCreateRequest, Quiz, QuizQuestion } from '../../core/models';
-import { DecimalPipe, SlicePipe } from '@angular/common';
+import { DecimalPipe, SlicePipe, CurrencyPipe } from '@angular/common';
 
 type Tab = 'dashboard' | 'courses' | 'create' | 'edit' | 'analytics' | 'lessons' | 'quiz';
 
 @Component({
   selector: 'app-instructor',
   standalone: true,
-  imports: [ReactiveFormsModule, DecimalPipe, SlicePipe],
+  imports: [ReactiveFormsModule, DecimalPipe, SlicePipe, CurrencyPipe],
   templateUrl: './instructor.component.html',
   styleUrl: './instructor.component.scss'
 })
@@ -34,6 +34,7 @@ export class InstructorComponent implements OnInit {
   
   // Computed Stats
   readonly totalStudents = computed(() => this.courses().reduce((sum, c) => sum + c.enrollmentCount, 0));
+  readonly totalRevenue = computed(() => this.courses().reduce((sum, c) => sum + ((c.price || 0) * (c.enrollmentCount || 0)), 0));
   readonly averageRating = computed(() => {
     const rated = this.courses().filter(c => c.averageRating && c.averageRating > 0);
     if (!rated.length) return 0;
