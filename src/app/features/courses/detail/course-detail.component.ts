@@ -47,7 +47,7 @@ export class CourseDetailComponent implements OnInit {
         this.loading.set(false);
         this.loadReviews(id);
         this.loadTotalDuration(id);
-        if (this.auth.isLoggedIn()) this.checkEnrollment(id);
+        if (this.auth.isLoggedIn() && this.auth.isStudent()) this.checkEnrollment(id);
       },
       error: () => {
         this.toast.error('Course not found.');
@@ -84,6 +84,10 @@ export class CourseDetailComponent implements OnInit {
   enroll(): void {
     if (!this.auth.isLoggedIn()) {
       this.toast.info('Please sign in to enroll.');
+      return;
+    }
+    if (!this.auth.isStudent()) {
+      this.toast.error('Only students can enroll in courses.');
       return;
     }
     const course = this.course();
@@ -147,5 +151,12 @@ export class CourseDetailComponent implements OnInit {
         this.submittingReview.set(false);
       }
     });
+  }
+
+  /** Handle hero background image error by clearing the background. */
+  onHeroImgError(event: any): void {
+    if (event.target) {
+      event.target.style.backgroundImage = 'none';
+    }
   }
 }

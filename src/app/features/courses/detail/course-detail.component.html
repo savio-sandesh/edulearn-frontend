@@ -12,7 +12,8 @@
 
 @else {
   <!-- ── Course Hero ───────────────────────────── -->
-  <div class="detail-hero" [style.backgroundImage]="course()!.thumbnailUrl ? 'url(' + course()!.thumbnailUrl + ')' : 'none'">
+  <div class="detail-hero" [style.backgroundImage]="course()!.thumbnailUrl ? 'url(' + course()!.thumbnailUrl + ')' : 'none'"
+       (error)="onHeroImgError($event)">
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <a routerLink="/courses" class="back-link">← All Courses</a>
@@ -79,7 +80,7 @@
       <section class="detail-section">
         <h2>Student Reviews</h2>
 
-        @if (isEnrolled()) {
+        @if (isEnrolled() && auth.isStudent()) {
           <div class="leave-review-box mb-4">
             <h3>Leave a Review</h3>
             <div class="review-stars-input">
@@ -139,7 +140,14 @@
     <aside class="enroll-card">
       <!-- Thumbnail preview -->
       @if (course()!.thumbnailUrl) {
-        <img [src]="course()!.thumbnailUrl" [alt]="course()!.title" class="enroll-thumb" />
+        <img [src]="course()!.thumbnailUrl"
+             [alt]="course()!.title"
+             class="enroll-thumb"
+             #thumbImg
+             (error)="thumbImg.style.display='none'; thumbPlaceholder.style.display='flex'" />
+        <div class="enroll-thumb-placeholder" #thumbPlaceholder style="display:none">
+          <span>🎓</span>
+        </div>
       } @else {
         <div class="enroll-thumb-placeholder">
           <span>🎓</span>
@@ -153,21 +161,25 @@
         </div>
 
         <!-- CTA Button -->
-        @if (isEnrolled()) {
-          <a [routerLink]="['/courses', course()!.courseId, 'learn']" class="btn-enrolled">
-            ▶ Continue Learning
-          </a>
+        @if (auth.isStudent()) {
+          @if (isEnrolled()) {
+            <a [routerLink]="['/courses', course()!.courseId, 'learn']" class="btn-enrolled">
+              ▶ Continue Learning
+            </a>
+          } @else {
+            <button class="btn-enroll" (click)="enroll()" [disabled]="enrolling() || checkingEnrollment()">
+              @if (enrolling()) {
+                <span class="spin"></span> Enrolling…
+              } @else {
+                {{ course()!.price === 0 ? 'Enroll for Free' : 'Enroll Now' }}
+              }
+            </button>
+          }
+        } @else if (auth.isLoggedIn()) {
+          <p class="login-hint">
+            Student accounts can enroll in this course.
+          </p>
         } @else {
-          <button class="btn-enroll" (click)="enroll()" [disabled]="enrolling() || checkingEnrollment()">
-            @if (enrolling()) {
-              <span class="spin"></span> Enrolling…
-            } @else {
-              {{ course()!.price === 0 ? 'Enroll for Free' : 'Enroll Now' }}
-            }
-          </button>
-        }
-
-        @if (!auth.isLoggedIn()) {
           <p class="login-hint">
             <a routerLink="/login">Sign in</a> to enroll in this course.
           </p>

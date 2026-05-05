@@ -68,10 +68,10 @@ export class CourseService {
     return this.http.put<{ message: string }>(`${this.base}/publish/${id}`, {});
   }
 
-  uploadThumbnail(id: number, file: File): Observable<{ thumbnailUrl: string }> {
+  uploadThumbnail(id: number, file: File): Observable<Course> {
     const form = new FormData();
     form.append('File', file);
-    return this.http.post<{ thumbnailUrl: string }>(`${this.base}/${id}/thumbnail`, form);
+    return this.http.post<Course>(`${this.base}/${id}/thumbnail`, form);
   }
 
   // ── Reviews ───────────────────────────────────────────────

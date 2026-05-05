@@ -8,7 +8,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { Course, CourseCreateRequest, Lesson, LessonCreateRequest, Quiz, QuizQuestion } from '../../core/models';
 import { DecimalPipe, SlicePipe } from '@angular/common';
 
-type Tab = 'dashboard' | 'courses' | 'create' | 'edit' | 'analytics' | 'revenue' | 'lessons' | 'quiz';
+type Tab = 'dashboard' | 'courses' | 'create' | 'edit' | 'analytics' | 'lessons' | 'quiz';
 
 @Component({
   selector: 'app-instructor',
@@ -34,7 +34,6 @@ export class InstructorComponent implements OnInit {
   
   // Computed Stats
   readonly totalStudents = computed(() => this.courses().reduce((sum, c) => sum + c.enrollmentCount, 0));
-  readonly totalRevenue = computed(() => this.courses().reduce((sum, c) => sum + (c.enrollmentCount * c.price), 0));
   readonly averageRating = computed(() => {
     const rated = this.courses().filter(c => c.averageRating && c.averageRating > 0);
     if (!rated.length) return 0;
@@ -140,10 +139,6 @@ export class InstructorComponent implements OnInit {
   }
 
   setTab(tab: Tab): void {
-    if (tab === 'revenue') {
-      this.toast.info(`${tab} section is coming soon!`);
-      return;
-    }
     this.activeTab.set(tab);
     if (tab === 'create') {
       this.wizardStep.set(1);
@@ -345,7 +340,10 @@ export class InstructorComponent implements OnInit {
       next: (course) => {
         if (this.thumbnailFile) {
           this.courseSvc.uploadThumbnail(course.courseId, this.thumbnailFile).subscribe({
-            next: () => {
+            next: (updatedCourse) => {
+              this.courses.update(list =>
+                list.map(c => c.courseId === updatedCourse.courseId ? updatedCourse : c)
+              );
               this.toast.success('Course and thumbnail created successfully!');
               this.finalizeCourseCreation();
             },
@@ -404,7 +402,10 @@ export class InstructorComponent implements OnInit {
       next: () => {
         if (this.editThumbnailFile) {
           this.courseSvc.uploadThumbnail(course.courseId, this.editThumbnailFile).subscribe({
-            next: () => {
+            next: (updatedCourse) => {
+              this.courses.update(list =>
+                list.map(c => c.courseId === updatedCourse.courseId ? updatedCourse : c)
+              );
               this.toast.success('Course updated successfully with new thumbnail!');
               this.finalizeCourseEdit();
             },

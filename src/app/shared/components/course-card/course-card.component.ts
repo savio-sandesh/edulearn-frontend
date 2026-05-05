@@ -10,10 +10,17 @@ import { StarRatingComponent } from '../star-rating/star-rating.component';
   imports: [RouterLink, StarRatingComponent, DecimalPipe],
   template: `
     <a [routerLink]="['/courses', course().courseId]" class="course-card">
-      <!-- Thumbnail -->
       <div class="thumb">
         @if (course().thumbnailUrl) {
-          <img [src]="course().thumbnailUrl" [alt]="course().title" />
+          <img [src]="course().thumbnailUrl"
+               [alt]="course().title"
+               #cardThumb
+               (error)="cardThumb.style.display='none'; cardPlaceholder.style.removeProperty('display')" />
+          <div class="thumb-placeholder" #cardPlaceholder style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="36" height="36">
+              <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.95 49.95 0 0 0-9.902 3.912l-.003.002-.34.18a.75.75 0 0 1-.707 0A50.01 50.01 0 0 0 7.5 12.174v-.224c0-.131.067-.248.172-.311a54.614 54.614 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.13 56.13 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.8 49.8 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z"/>
+            </svg>
+          </div>
         } @else {
           <div class="thumb-placeholder">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="36" height="36">
