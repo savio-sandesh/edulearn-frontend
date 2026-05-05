@@ -45,16 +45,6 @@
                 <span class="category-badge">{{ course.courseCategory ?? 'Course' }}</span>
                 <h3>{{ course.courseTitle }}</h3>
                 
-                <div class="progress-wrap">
-                  <div class="prog-meta">
-                    <span>Progress</span>
-                    <span>{{ course.progress }}%</span>
-                  </div>
-                  <div class="prog-bar">
-                    <div class="prog-fill" [style.width.%]="course.progress"></div>
-                  </div>
-                </div>
-
                 <a [routerLink]="['/courses', course.courseId, 'learn']" class="btn-action">
                   Continue Learning
                 </a>
