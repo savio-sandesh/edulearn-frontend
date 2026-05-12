@@ -8,7 +8,7 @@ const ACCESS_TOKEN_KEY = 'edulearn_access_token';
  *
  * Skips token injection for:
  *  - login / register / refresh endpoints (public)
- *  - any third-party URLs that don't contain 'localhost:5'
+ *  - any third-party URLs that don't target the gateway
  */
 export const jwtInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -35,17 +35,17 @@ export const jwtInterceptor: HttpInterceptorFn = (
   return next(authReq);
 };
 
-/** Returns true if the URL targets one of our microservices (localhost:5xxx). */
+/** Returns true if the URL targets one of our microservices through the gateway. */
 function isOurApi(url: string): boolean {
-  return /localhost:5\d{3}/.test(url) || url.includes('/gateway/');
+  return url.includes('gateway-api.mangoisland-961b8c02.southeastasia.azurecontainerapps.io') || url.includes('/gateway/');
 }
 
 /** Public endpoints that must NOT receive the Authorization header. */
 function isPublicAuthEndpoint(url: string): boolean {
   return (
-    url.includes('/api/user/login') ||
-    url.includes('/api/user/register') ||
-    url.includes('/api/user/refresh') ||
-    url.includes('/api/user/validate-token')
+    url.includes('/gateway/auth/auth/login') ||
+    url.includes('/gateway/auth/auth/register') ||
+    url.includes('/gateway/auth/auth/refresh') ||
+    url.includes('/gateway/auth/auth/validate-token')
   );
 }

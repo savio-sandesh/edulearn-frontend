@@ -1,12 +1,12 @@
 export const environment = {
   production: false,
   apis: {
-    auth: 'http://localhost:5000/gateway/auth',
-    course: 'http://localhost:5000/gateway/course',
-    enrollment: 'http://localhost:5000/gateway/enrollment',
-    content: 'http://localhost:5000/gateway/content',
-    assessment: 'http://localhost:5000/gateway/assessment',
-    progress: 'http://localhost:5000/gateway/progress',
-    review: 'http://localhost:5000/gateway/review',
+    auth: 'https://gateway-api.mangoisland-961b8c02.southeastasia.azurecontainerapps.io/gateway/auth',
+    course: 'https://gateway-api.mangoisland-961b8c02.southeastasia.azurecontainerapps.io/gateway/course',
+    enrollment: 'https://gateway-api.mangoisland-961b8c02.southeastasia.azurecontainerapps.io/gateway/enrollment',
+    content: 'https://gateway-api.mangoisland-961b8c02.southeastasia.azurecontainerapps.io/gateway/content',
+    assessment: 'https://gateway-api.mangoisland-961b8c02.southeastasia.azurecontainerapps.io/gateway/assessment',
+    progress: 'https://gateway-api.mangoisland-961b8c02.southeastasia.azurecontainerapps.io/gateway/progress',
+    review: 'https://gateway-api.mangoisland-961b8c02.southeastasia.azurecontainerapps.io/gateway/review',
   },
 };

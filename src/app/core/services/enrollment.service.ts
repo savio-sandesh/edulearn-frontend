@@ -33,12 +33,12 @@ export class EnrollmentService {
 
   /** Get enrollments for a specific student (admin/instructor). */
   getByStudent(studentId: number): Observable<Enrollment[]> {
-    return this.http.get<Enrollment[]>(`${this.base}/student/${studentId}`);
+    return this.http.get<Enrollment[]>(`${this.base}/byStudent/${studentId}`);
   }
 
   /** Get all enrollments for a course (instructor/admin). */
   getByCourse(courseId: number): Observable<Enrollment[]> {
-    return this.http.get<Enrollment[]>(`${this.base}/course/${courseId}`);
+    return this.http.get<Enrollment[]>(`${this.base}/byCourse/${courseId}`);
   }
 
   /** Mark a lesson as complete for the current user. */
