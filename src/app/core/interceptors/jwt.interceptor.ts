@@ -43,9 +43,9 @@ function isOurApi(url: string): boolean {
 /** Public endpoints that must NOT receive the Authorization header. */
 function isPublicAuthEndpoint(url: string): boolean {
   return (
-    url.includes('/gateway/auth/auth/login') ||
-    url.includes('/gateway/auth/auth/register') ||
-    url.includes('/gateway/auth/auth/refresh') ||
-    url.includes('/gateway/auth/auth/validate-token')
+    url.includes('/gateway/auth/api/auth/login') ||
+    url.includes('/gateway/auth/api/auth/register') ||
+    url.includes('/gateway/auth/api/auth/refresh') ||
+    url.includes('/gateway/auth/api/auth/validate-token')
   );
 }
