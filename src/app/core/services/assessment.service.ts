@@ -20,7 +20,7 @@ export interface QuizCreatePayload {
 @Injectable({ providedIn: 'root' })
 export class AssessmentService {
   private readonly http = inject(HttpClient);
-  private readonly base = `${environment.apis.assessment}/api/quizzes`;
+  private readonly base = `${environment.apis.assessment}`;
 
   // ── Instructor: Quiz CRUD ──────────────────────────────
 

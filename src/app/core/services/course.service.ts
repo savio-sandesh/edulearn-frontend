@@ -18,7 +18,7 @@ export interface CourseFilters {
 @Injectable({ providedIn: 'root' })
 export class CourseService {
   private readonly http = inject(HttpClient);
-  private readonly base = `${environment.apis.course}/api/courses`;
+  private readonly base = `${environment.apis.course}`;
 
   /** Fetch all courses, with optional search/filter/pagination. */
   getAll(filters?: CourseFilters): Observable<Course[]> {
@@ -84,7 +84,7 @@ export class CourseService {
   /** Submit a review for a course. */
   addReview(courseId: number, dto: ReviewCreateRequest): Observable<Review> {
     const payload = { ...dto, courseId };
-    return this.http.post<Review>(`${environment.apis.course}/api/reviews`, payload);
+    return this.http.post<Review>(`${environment.apis.course}/reviews`, payload);
   }
 
   /** Delete a review. */

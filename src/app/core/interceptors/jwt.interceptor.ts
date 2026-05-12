@@ -37,7 +37,7 @@ export const jwtInterceptor: HttpInterceptorFn = (
 
 /** Returns true if the URL targets one of our microservices (localhost:5xxx). */
 function isOurApi(url: string): boolean {
-  return /localhost:5\d{3}/.test(url);
+  return /localhost:5\d{3}/.test(url) || url.includes('/gateway/');
 }
 
 /** Public endpoints that must NOT receive the Authorization header. */

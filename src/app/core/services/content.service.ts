@@ -7,7 +7,7 @@ import { Lesson, LessonCreateRequest, LessonUpdateRequest, ReorderLessonsRequest
 @Injectable({ providedIn: 'root' })
 export class ContentService {
   private readonly http = inject(HttpClient);
-  private readonly base = `${environment.apis.content}/api/lessons`;
+  private readonly base = `${environment.apis.content}`;
 
   /** Get all published lessons for a course, sorted by order. */
   getLessons(courseId: number): Observable<Lesson[]> {

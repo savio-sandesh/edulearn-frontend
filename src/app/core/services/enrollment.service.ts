@@ -11,8 +11,8 @@ import { map } from 'rxjs/operators';
 export class EnrollmentService {
   private readonly http = inject(HttpClient);
   private readonly authSvc = inject(AuthService);
-  private readonly base = `${environment.apis.enrollment}/api/enrollments`;
-  private readonly progressBase = `${environment.apis.progress}/api/progress`;
+  private readonly base = `${environment.apis.enrollment}`;
+  private readonly progressBase = `${environment.apis.progress}`;
 
   /** Enroll the authenticated user in a course. */
   enroll(courseId: number): Observable<Enrollment> {
