@@ -110,7 +110,7 @@ The UI is built around a **premium dark design system** with glassmorphism cards
 
 ### Key Design Decisions
 
-- **Direct microservice calls** — The default `environment.ts` points directly at each service. The YARP Gateway (`Edulearn.Gateway.API`) is available as a single-origin alternative.
+- **Gateway-first local setup** — The development environment points every API base URL at `http://localhost:5000/gateway/`, and the YARP Gateway (`Edulearn.Gateway.API`) is the single-origin entry point.
 - **Signals-first** — `AuthService` uses `signal<User|null>` with `computed` helpers: `isLoggedIn`, `userRole`, `isStudent`, `isInstructor`, `isAdmin`.
 - **Functional interceptors** — `JwtInterceptor` and `ErrorInterceptor` are registered via `withInterceptors([...])` in `app.config.ts`.
 - **Lazy loading everywhere** — All feature routes use `loadComponent()` for optimal bundle splitting.
@@ -178,8 +178,9 @@ src/
 │   └── app.config.ts                  # providers: HttpClient, Router, Animations
 │
 ├── environments/
-│   ├── environment.ts                 # Development (localhost ports)
-│   └── environment.production.ts     # Production URLs
+│   ├── environment.ts                 # Local gateway defaults
+│   ├── environment.development.ts     # Development gateway URLs
+│   └── environment.ts                 # Production gateway URLs
 │
 ├── styles.scss                        # Global design system (tokens, reset, utils)
 └── index.html                         # SEO meta, theme-color
@@ -228,25 +229,28 @@ dotnet run --project .\edulearn-backend\src\EduLearn.Assessment.API\EduLearn.Ass
 
 ## ⚙️ Environment Configuration
 
-All microservice base URLs are defined in `src/environments/environment.ts`:
+Local development routes all API calls through the YARP Gateway at `http://localhost:5000/gateway/`.
+
+All microservice base URLs are defined in `src/environments/environment.development.ts` for local runs:
 
 ```typescript
 export const environment = {
   production: false,
   apis: {
-    auth:       'http://localhost:5206',
-    course:     'http://localhost:5224',
-    enrollment: 'http://localhost:5259',
-    content:    'http://localhost:5176',
-    assessment: 'http://localhost:5012',
-    progress:   'http://localhost:5218',
+    auth:       'http://localhost:5000/gateway/auth',
+    course:     'http://localhost:5000/gateway/course',
+    enrollment: 'http://localhost:5000/gateway/enrollment',
+    content:    'http://localhost:5000/gateway/content',
+    assessment: 'http://localhost:5000/gateway/assessment',
+    progress:   'http://localhost:5000/gateway/progress',
+    review:     'http://localhost:5000/gateway/review',
   },
 };
 ```
 
-> **Note:** The `EduLearn.Review.API` (`:5144`) and `Edulearn.Gateway.API` (`:5100`) are available in the backend but are not wired into the Angular environment config by default. Wire them in as needed.
+The Angular build swaps `src/environments/environment.ts` with `src/environments/environment.development.ts` for development via `fileReplacements` in `angular.json`.
 
-For production, update `environment.production.ts` with your deployed API base URLs. The build automatically swaps files via `fileReplacements` in `angular.json`.
+Production builds use `src/environments/environment.ts` directly, and the production configuration also declares the matching file replacement so the environment split stays explicit.
 
 ---
 

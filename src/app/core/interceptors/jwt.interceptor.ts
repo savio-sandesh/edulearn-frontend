@@ -37,15 +37,15 @@ export const jwtInterceptor: HttpInterceptorFn = (
 
 /** Returns true if the URL targets one of our microservices through the gateway. */
 function isOurApi(url: string): boolean {
-  return url.includes('gateway-api.mangoisland-961b8c02.southeastasia.azurecontainerapps.io') || url.includes('/gateway/');
+  return url.includes('/gateway/');
 }
 
 /** Public endpoints that must NOT receive the Authorization header. */
 function isPublicAuthEndpoint(url: string): boolean {
   return (
-    url.includes('/gateway/auth/api/auth/login') ||
-    url.includes('/gateway/auth/api/auth/register') ||
-    url.includes('/gateway/auth/api/auth/refresh') ||
-    url.includes('/gateway/auth/api/auth/validate-token')
+    url.includes('/gateway/auth/login') ||
+    url.includes('/gateway/auth/register') ||
+    url.includes('/gateway/auth/refresh') ||
+    url.includes('/gateway/auth/validate-token')
   );
 }

@@ -19,7 +19,7 @@ const USER_KEY = 'edulearn_user';
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly base = `${environment.apis.auth}/api/auth`;
+  private readonly base = `${environment.apis.auth}`;
 
   // ─── Signals ──────────────────────────────────────────────
   private readonly _currentUser = signal<User | null>(this.loadUserFromStorage());
